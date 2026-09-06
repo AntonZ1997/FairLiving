@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Creation of initial database schema -->
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        ">
+    <changeSet  id="1"  author="Anton">
+        <createTable tableName="user">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="email" type="text">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="password" type="text" >
+                <constraints nullable="false" />
+            </column>
+            <column name="user_name" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="household">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="name" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="invitation_link" type="text">
+                <constraints unique="true" nullable="false" />
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createTable tableName="level">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="level_number" type="int" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="required_xp" type="int">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="title" type="text">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <sql>
+            ALTER TABLE level ADD CONSTRAINT level_number_not_smaller_than_one
+                CHECK (level_number &gt;= 1);
+            ALTER TABLE level ADD CONSTRAINT required_xp_non_negative
+                CHECK (required_xp &gt;= 0);
+        </sql>
+
+        <createTable tableName="household_member">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="household_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_household_member_household" referencedTableName="household" referencedColumnNames="id"/>
+            </column>
+            <column name="user_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_household_member_user" referencedTableName="user" referencedColumnNames="id"/>
+            </column>
+            <column name="role" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="streak_count" type="int" defaultValueNumeric="0">
+                <constraints nullable="false" />
+            </column>
+            <column name="experience_points" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_id" type="uuid" >
+                <constraints nullable="false" foreignKeyName="fk_household_member_level" referencedTableName="level" referencedColumnNames="id"/>
+            </column>
+            <column name="joined" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    <sql>
+        ALTER TABLE household_member
+            ADD CONSTRAINT unique_household_member_household_user UNIQUE (household_id, user_id);
+        ALTER TABLE household_member
+            ADD CONSTRAINT check_role_valid
+                CHECK (role IN ('admin', 'member'));
+        ALTER TABLE household_member
+            ADD CONSTRAINT check_streak_count_non_negative
+                CHECK (streak_count &gt;= 0);
+        ALTER TABLE household_member
+            ADD CONSTRAINT experience_points_non_negative
+                CHECK (experience_points &gt;= 0);
+    </sql>
+
+        <createTable tableName="notification">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="household_member_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_notification_household_member" referencedTableName="household_member" referencedColumnNames="id" />
+            </column>
+            <column name="type" type="text" >
+                <constraints nullable="false" />
+            </column>
+            <column name="message" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+            <column name="read" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <sql>
+            ALTER TABLE notification
+                ADD CONSTRAINT check_type_valid
+                    CHECK (type IN ('info', 'warning', 'alert'));
+        </sql>
+        <createTable tableName="difficulty">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="name" type="text" >
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="base_xp" type="int" >
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <createTable tableName="task">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="household_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_task_household" referencedTableName="household" referencedColumnNames="id"/>
+            </column>
+            <column name="name" type="text">
+                <constraints nullable="false" />
+            </column>
+            <column name="description" type="text" />
+            <column name="difficulty_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_task_difficulty" referencedTableName="difficulty" referencedColumnNames="id"/>
+            </column>
+            <column name="interval_days" type="int" defaultValueNumeric="0">
+                <constraints nullable="false" />
+            </column>
+            <column name="active" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <sql>
+            ALTER TABLE task
+                ADD CONSTRAINT interval_days_non_negative
+                    CHECK (interval_days &gt;= 0);
+        </sql>
+        <createTable tableName="assigned_task">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="task_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_assigned_task_task" referencedTableName="task" referencedColumnNames="id" />
+            </column>
+            <column name="assigned_member_id" type="uuid">
+                <constraints nullable="false" foreignKeyName="fk_assigned_task_household_member" referencedTableName="household_member" referencedColumnNames="id" />
+            </column>
+            <column name="due_date" type="timestamp">
+                <constraints nullable="false" />
+            </column>
+            <column name="completed_at" type="timestamp">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="text" >
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <sql>
+            ALTER TABLE assigned_task
+                ADD CONSTRAINT check_status_valid
+                    CHECK (status IN ('open', 'completed'));
+        </sql>
+
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Initial database level and difficulty inserts -->
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        ">
+    
+    <changeSet id="2" author="Anton">
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000001"/>
+            <column name="level_number" valueNumeric="1"/>
+            <column name="required_xp" valueNumeric="0"/>
+            <column name="title" value="Neuling"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000002"/>
+            <column name="level_number" valueNumeric="2"/>
+            <column name="required_xp" valueNumeric="50"/>
+            <column name="title" value="Staubsauger-Bediener"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000003"/>
+            <column name="level_number" valueNumeric="3"/>
+            <column name="required_xp" valueNumeric="120"/>
+            <column name="title" value="Mülltonnen-Rausbringer"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000004"/>
+            <column name="level_number" valueNumeric="4"/>
+            <column name="required_xp" valueNumeric="220"/>
+            <column name="title" value="Wäscheberg-Beseitiger"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000005"/>
+            <column name="level_number" valueNumeric="5"/>
+            <column name="required_xp" valueNumeric="350"/>
+            <column name="title" value="Spülmaschinen-Experte"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000006"/>
+            <column name="level_number" valueNumeric="6"/>
+            <column name="required_xp" valueNumeric="520"/>
+            <column name="title" value="Ordnungs-Sheriff"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000007"/>
+            <column name="level_number" valueNumeric="7"/>
+            <column name="required_xp" valueNumeric="730"/>
+            <column name="title" value="Der Entstauber"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000008"/>
+            <column name="level_number" valueNumeric="8"/>
+            <column name="required_xp" valueNumeric="1000"/>
+            <column name="title" value="Schmutz-Killer"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000009"/>
+            <column name="level_number" valueNumeric="9"/>
+            <column name="required_xp" valueNumeric="1350"/>
+            <column name="title" value="Hausmeister-Geselle"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000010"/>
+            <column name="level_number" valueNumeric="10"/>
+            <column name="required_xp" valueNumeric="1800"/>
+            <column name="title" value="Aufgaben-Unteroffizier"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000011"/>
+            <column name="level_number" valueNumeric="11"/>
+            <column name="required_xp" valueNumeric="2400"/>
+            <column name="title" value="Reinraum-Überwacher"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000012"/>
+            <column name="level_number" valueNumeric="12"/>
+            <column name="required_xp" valueNumeric="3200"/>
+            <column name="title" value="Putzfee"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000013"/>
+            <column name="level_number" valueNumeric="13"/>
+            <column name="required_xp" valueNumeric="4300"/>
+            <column name="title" value="Hausmaster of Science"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000014"/>
+            <column name="level_number" valueNumeric="14"/>
+            <column name="required_xp" valueNumeric="5800"/>
+            <column name="title" value="Aufgaben-General"/>
+        </insert>
+        <insert tableName="level">
+            <column name="id" value="10000000-0000-0000-0000-000000000015"/>
+            <column name="level_number" valueNumeric="15"/>
+            <column name="required_xp" valueNumeric="7800"/>
+            <column name="title" value="Putzlegende"/>
+        </insert>
+
+        <insert tableName="difficulty">
+            <column name="id" value="20000000-0000-0000-0000-000000000001"/>
+            <column name="name" value="Leicht" />
+            <column name="base_xp" valueNumeric="10" />
+        </insert>
+        <insert tableName="difficulty">
+            <column name="id" value="20000000-0000-0000-0000-000000000002"/>
+            <column name="name" value="Mittel" />
+            <column name="base_xp" valueNumeric="20" />
+        </insert>
+        <insert tableName="difficulty">
+            <column name="id" value="20000000-0000-0000-0000-000000000003"/>
+            <column name="name" value="Schwer" />
+            <column name="base_xp" valueNumeric="30" />
+        </insert>
+    </changeSet>
+    
+</databaseChangeLog>
