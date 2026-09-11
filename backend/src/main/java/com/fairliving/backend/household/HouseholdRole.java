@@ -1,5 +1,8 @@
 package com.fairliving.backend.household;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum HouseholdRole {
 
     ADMIN("admin"),
@@ -11,10 +14,12 @@ public enum HouseholdRole {
         this.role = role;
     }
 
+    @JsonValue
     public String getRole() {
         return role;
     }
 
+    @JsonCreator
     public static HouseholdRole fromString(String role) {
         for (HouseholdRole householdRole : HouseholdRole.values()) {
             if (householdRole.getRole().equals(role)) {
