@@ -1,4 +1,4 @@
-package com.fairliving.backend.user;
+package com.fairliving.backend.user.dto;
 
 import de.fairliving.backend.jooq.tables.records.UserRecord;
 

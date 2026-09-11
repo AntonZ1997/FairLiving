@@ -1,9 +1,9 @@
 package com.fairliving.backend.auth;
 
-import com.fairliving.backend.auth.dao.LoginRequest;
-import com.fairliving.backend.auth.dao.RegisterRequest;
+import com.fairliving.backend.auth.dto.LoginRequest;
+import com.fairliving.backend.auth.dto.RegisterRequest;
 import com.fairliving.backend.user.UserService;
-import com.fairliving.backend.user.UserResponse;
+import com.fairliving.backend.user.dto.UserResponse;
 import de.fairliving.backend.jooq.tables.records.UserRecord;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

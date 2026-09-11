@@ -1,4 +1,4 @@
-package com.fairliving.backend.auth.dao;
+package com.fairliving.backend.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +9,7 @@ public record RegisterRequest(
         @NotBlank
         @Pattern(
                 regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,}$",
-                message = "Das Passwort muss mindestens 8 Zeichen lang sein und Groß- und Kleinbuchstaben, eine Zahl sowie ein Sonderzeichen enthalten."
+                message = "Das Passwort muss mindestens 8 Zeichen lang sein, Groß- und Kleinbuchstaben, eine Zahl sowie ein Sonderzeichen enthalten."
         )
         String password,
         @NotBlank String userName

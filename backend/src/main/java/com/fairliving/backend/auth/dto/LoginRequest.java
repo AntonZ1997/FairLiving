@@ -1,4 +1,4 @@
-package com.fairliving.backend.auth.dao;
+package com.fairliving.backend.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
