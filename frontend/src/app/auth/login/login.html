@@ -1,0 +1,29 @@
+<div class="page">
+  <h1>Login</h1>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="outline">
+      <mat-label>E-Mail</mat-label>
+      <input matInput type="email" formControlName="email" autocomplete="email" />
+      @if (form.controls.email.hasError('email')) {
+        <mat-error>Keine gültige E-Mail Adresse.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Passwort</mat-label>
+      <input matInput type="password" formControlName="password" autocomplete="current-password" />
+    </mat-form-field>
+
+    @if (errorMessage()) {
+      <p class="error" role="alert">{{ errorMessage() }}</p>
+    }
+
+    <button mat-flat-button type="submit" [disabled]="form.invalid || submitting()">
+      {{ submitting() ? 'Einloggen…' : 'Einloggen' }}
+    </button>
+
+    <p class="hint">Noch kein Mitglied?<br />Dann hier registrieren:</p>
+    <a mat-button routerLink="/register">Registrieren</a>
+  </form>
+</div>

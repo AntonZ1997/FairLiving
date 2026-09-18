@@ -32,7 +32,7 @@
             <column name="name" type="text">
                 <constraints nullable="false" />
             </column>
-            <column name="invitation_link" type="text">
+            <column name="invitation_id" type="text">
                 <constraints unique="true" nullable="false" />
             </column>
             <column name="created_at" type="timestamp">

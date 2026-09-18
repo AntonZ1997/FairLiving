@@ -1,11 +1,9 @@
 package com.fairliving.backend.household.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.UUID;
 
 public record JoinHouseholdRequest(
-        @NotBlank String invitationToken
-) {
-    public JoinHouseholdRequest {
-        invitationToken = invitationToken == null ? null : invitationToken.strip();
-    }
-}
+        @NotNull UUID invitationId
+) {}

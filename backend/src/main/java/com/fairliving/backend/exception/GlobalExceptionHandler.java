@@ -34,8 +34,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 
-    @ExceptionHandler(InvalidInvitationTokenException.class)
-    public ResponseEntity<String> handleInvalidInvitationToken(InvalidInvitationTokenException e) {
+    @ExceptionHandler(InvalidInvitationIdException.class)
+    public ResponseEntity<String> handleInvalidInvitationId(InvalidInvitationIdException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 

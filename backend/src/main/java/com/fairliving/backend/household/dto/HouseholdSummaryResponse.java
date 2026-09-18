@@ -9,6 +9,8 @@ public record HouseholdSummaryResponse(
         UUID householdId,
         String householdName,
         HouseholdRole role,
+        int openTaskCount,
+        int memberCount,
         Instant joined
 ) {
 }

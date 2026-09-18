@@ -1,0 +1,17 @@
+<h2 mat-dialog-title>Haushalt beitreten</h2>
+
+<mat-dialog-content>
+  <p><strong>{{ data.preview.name }}</strong></p>
+  <p>{{ data.preview.memberCount }} Mitglieder</p>
+
+  @if (errorMessage()) {
+    <p role="alert">{{ errorMessage() }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button [disabled]="joining()" (click)="cancel()">Abbrechen</button>
+  <button mat-flat-button [disabled]="joining()" (click)="confirm()">
+    {{ joining() ? 'Beitreten …' : 'Beitreten' }}
+  </button>
+</mat-dialog-actions>

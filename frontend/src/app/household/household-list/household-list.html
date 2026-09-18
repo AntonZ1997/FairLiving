@@ -1,0 +1,65 @@
+<div class="page">
+  <h1>Deine Haushalte</h1>
+
+  <h2>Haushalt erstellen</h2>
+
+  @if (showCreateForm()) {
+    <form class="create-form" [formGroup]="createForm" (ngSubmit)="create()">
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput type="text" formControlName="name" />
+      </mat-form-field>
+      <button mat-flat-button type="submit" [disabled]="createForm.invalid">Anlegen</button>
+    </form>
+  } @else {
+    <button mat-fab type="button" aria-label="Haushalt erstellen" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+    </button>
+  }
+
+  <p class="or">oder</p>
+
+  <h2>Haushalt über Link beitreten</h2>
+
+  <form class="join-form" [formGroup]="joinForm" (ngSubmit)="join()">
+    <mat-form-field appearance="outline">
+      <mat-label>Einladungslink</mat-label>
+      <input matInput type="text" formControlName="invitationId" />
+      @if (joinErrorMessage()) {
+        <mat-error>{{ joinErrorMessage() }}</mat-error>
+      }
+    </mat-form-field>
+
+    <button mat-flat-button type="submit" [disabled]="joinForm.invalid || checkingInvitation()">
+      {{ checkingInvitation() ? 'Prüfen…' : 'Beitreten' }}
+    </button>
+  </form>
+
+  @if (errorMessage()) {
+    <p class="error" role="alert">{{ errorMessage() }}</p>
+  }
+
+  @if (loading()) {
+    <mat-spinner diameter="40" />
+  } @else if (households().length === 0) {
+    <p class="hint">Du bist noch in keinem Haushalt.</p>
+  } @else {
+    <div class="households">
+      @for (household of households(); track household.householdId) {
+        <mat-card class="card">
+          <a [routerLink]="['/households', household.householdId]">
+            <mat-card-header>
+              <mat-card-title class="household-card-title">{{ household.householdName }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="household-card-content">
+              <span>{{ memberLabel(household.memberCount) }}</span>
+              <span>{{ openTaskLabel(household.openTaskCount) }}</span>
+              <mat-chip>{{ roleLabel(household.role) }}</mat-chip>
+
+            </mat-card-content>
+          </a>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

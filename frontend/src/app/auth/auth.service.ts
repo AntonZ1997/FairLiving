@@ -32,8 +32,11 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
-    await firstValueFrom(this.http.delete<void>('/api/auth/logout'));
-    this.currentUserSignal.set(null);
+    try {
+    await firstValueFrom(this.http.post<void>('/api/auth/logout', null));
+    } finally {
+      this.currentUserSignal.set(null);
+    }
   }
 
 }

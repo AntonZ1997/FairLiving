@@ -3,7 +3,7 @@ export type HouseholdRole = 'admin' | 'member';
 export interface HouseholdResponse {
   id: string;
   name: string;
-  invitationToken: string;
+  invitationId: string;
   createdAt: string;
 }
 
@@ -11,6 +11,8 @@ export interface HouseholdSummaryResponse {
   householdId: string;
   householdName: string;
   role: HouseholdRole;
+  openTaskCount: number;
+  memberCount: number;
   joined: string;
 }
 
@@ -23,4 +25,11 @@ export interface HouseholdMemberResponse {
   levelNumber: number;
   levelTitle: string;
   joined: string;
+}
+
+export interface HouseholdPreviewResponse {
+  name: string;
+  memberCount: number;
+  createdAt: string;
+  alreadyMember: boolean;
 }

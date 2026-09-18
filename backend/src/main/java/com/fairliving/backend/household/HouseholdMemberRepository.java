@@ -79,4 +79,12 @@ public class HouseholdMemberRepository {
                 .fetchOptionalInto(HouseholdMemberRecord.class);
     }
 
+    public int countMembersByHouseholdId(UUID householdId) {
+        return dslContext
+                .fetchCount(
+                        dslContext.selectFrom(HOUSEHOLD_MEMBER)
+                                .where(HOUSEHOLD_MEMBER.HOUSEHOLD_ID.eq(householdId))
+                );
+    }
+
 }

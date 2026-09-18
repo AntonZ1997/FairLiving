@@ -1,1 +1,87 @@
-/* You can add global styles to this file, and also import other style files */
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+body {
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background: radial-gradient(circle, rgba(179, 255, 244, 0.7) 0%, rgba(66, 193, 219, 0.7) 100%);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+  height: 100%;
+}
+
+.snackbar-success {
+  --mat-snack-bar-container-color: #2e7d32;
+  --mat-snack-bar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #ffffff;
+}
+
+.snackbar-error {
+  --mat-snack-bar-container-color: #c62828;
+  --mat-snack-bar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #ffffff;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100% - 2rem, 34rem);
+  margin: auto;
+  padding: 2.5rem 2rem 3rem;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgb(0 0 0 / 8%);
+  text-align: center;
+}
+
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+router-outlet + * {
+  display: flex;
+  flex: 1;
+  padding: 2rem 1rem 10rem;
+}
+
+.mat-mdc-form-field-subscript-wrapper {
+  min-height: 2.5rem;
+}
+
+.page h1 {
+  margin: 1.5rem 0 3.5rem;
+  font-size: 3rem;
+  font-weight: 400;
+  line-height: 1.1;
+}
+

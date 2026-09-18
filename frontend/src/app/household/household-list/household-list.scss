@@ -1,0 +1,64 @@
+h2 {
+  font-weight: 400;
+  margin: 1rem 0;
+}
+
+.or {
+  margin: 1.5rem 0;
+  font-size: 1.25rem;
+}
+
+.join-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 380px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.households {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.card {
+  width: 17rem;
+}
+
+.card a {
+  display: block;
+  padding: 2rem 1.5rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.card mat-card-header {
+  display: block;
+  padding: 0;
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
+.household-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.household-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0;
+  font-size: 1rem;
+}
+
+.page {
+  width: min(100% - 2rem, 60rem);
+}

@@ -1,6 +1,6 @@
 package com.fairliving.backend.household;
 
-import com.fairliving.backend.exception.InvalidInvitationTokenException;
+import com.fairliving.backend.exception.InvalidInvitationIdException;
 import com.fairliving.backend.exception.UserIsAlreadyHouseholdMemberException;
 import com.fairliving.backend.exception.UserIsNotAHouseholdMemberException;
 import com.fairliving.backend.exception.UserIsNotHouseholdAdminException;
@@ -33,15 +33,15 @@ public class HouseholdService {
 
     @Transactional
     public HouseholdResponse createHousehold(CreateHouseholdRequest createHouseholdRequest, UUID userId) {
-        HouseholdRecord household = householdRepository.insert(createHouseholdRequest.name(), generateInvitationToken());
+        HouseholdRecord household = householdRepository.insert(createHouseholdRequest.name(), generateInvitationId());
         addMember(household.getId(), userId, HouseholdRole.ADMIN);
 
         return HouseholdResponse.from(household);
     }
 
     public HouseholdResponse joinHousehold(JoinHouseholdRequest joinHouseholdRequest, UUID userId) {
-        HouseholdRecord household = householdRepository.findByInvitationToken(joinHouseholdRequest.invitationToken())
-                .orElseThrow(InvalidInvitationTokenException::new);
+        HouseholdRecord household = householdRepository.findByInvitationId(joinHouseholdRequest.invitationId())
+                .orElseThrow(InvalidInvitationIdException::new);
 
         if(householdMemberRepository.exists(household.getId(), userId)) {
             throw new UserIsAlreadyHouseholdMemberException(household.getId(), userId);
@@ -65,6 +65,26 @@ public class HouseholdService {
         return householdMemberRepository.findMembers(householdId);
     }
 
+    public HouseholdPreviewResponse getHouseholdPreview(UUID invitationId, UUID userId) {
+        HouseholdRecord household = householdRepository.findByInvitationId(invitationId)
+                .orElseThrow(InvalidInvitationIdException::new);
+
+        return new HouseholdPreviewResponse(
+                household.getName(),
+                householdMemberRepository.countMembersByHouseholdId(household.getId()),
+                household.getCreatedAt(),
+                householdMemberRepository.exists(household.getId(), userId)
+        );
+    }
+
+    public HouseholdResponse getHousehold(UUID householdId, UUID userId) {
+        requireMembership(householdId, userId);
+
+        return householdRepository.findById(householdId)
+                .map(HouseholdResponse::from)
+                .orElseThrow(() -> new UserIsNotAHouseholdMemberException(householdId, userId));
+    }
+
     private HouseholdMemberRecord requireMembership(UUID householdId, UUID userId) {
         return householdMemberRepository.findMembership(householdId, userId)
                 .orElseThrow(() -> new UserIsNotAHouseholdMemberException(householdId, userId));
@@ -85,7 +105,7 @@ public class HouseholdService {
 
     }
 
-    private String generateInvitationToken() {
+    private String generateInvitationId() {
         return UUID.randomUUID().toString();
     }
 }

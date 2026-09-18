@@ -40,9 +40,21 @@ public class HouseholdController {
         return ResponseEntity.ok(householdService.getHouseholdsForUser(userId));
     }
 
+    @GetMapping("/{householdId}")
+    public ResponseEntity<HouseholdResponse> getHousehold(@PathVariable UUID householdId, Authentication authentication) {
+        UUID userId = currentUserProvider.get(authentication).getId();
+        return ResponseEntity.ok(householdService.getHousehold(householdId, userId));
+    }
+
     @GetMapping("/{householdId}/members")
     public ResponseEntity<List<HouseholdMemberResponse>> getMembers(@PathVariable UUID householdId, Authentication authentication) {
         UUID userId = currentUserProvider.get(authentication).getId();
         return ResponseEntity.ok(householdService.getMembers(householdId, userId));
+    }
+
+    @GetMapping("/invitations/{invitationId}")
+    public ResponseEntity<HouseholdPreviewResponse> previewHousehold(@PathVariable UUID invitationId, Authentication authentication) {
+        UUID userId = currentUserProvider.get(authentication).getId();
+        return ResponseEntity.ok(householdService.getHouseholdPreview(invitationId, userId));
     }
 }

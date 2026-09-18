@@ -8,14 +8,14 @@ import java.util.UUID;
 public record HouseholdResponse(
         UUID id,
         String name,
-        String invitationToken,
+        String invitationId,
         Instant createdAt
 ) {
     public static HouseholdResponse from(HouseholdRecord record) {
         return new HouseholdResponse(
                 record.getId(),
                 record.getName(),
-                record.getInvitationLink(),
+                record.getInvitationId(),
                 record.getCreatedAt()
         );
     }
