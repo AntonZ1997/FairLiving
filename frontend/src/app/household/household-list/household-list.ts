@@ -125,7 +125,7 @@ export class HouseholdList implements OnInit {
       const preview = await this.householdService.preview(invitationId);
 
       if (preview.alreadyMember) {
-        this.setJoinError('Du bist diesem Haushalt bereits beigetreten.');
+        this.setJoinError('Du bist bereits Mitglied dieses Haushalts.');
         return;
       }
 

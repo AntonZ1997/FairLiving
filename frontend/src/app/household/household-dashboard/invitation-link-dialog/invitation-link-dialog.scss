@@ -1,0 +1,20 @@
+p {
+  margin: 0 0 1rem;
+}
+
+.link-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.link-row mat-form-field {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+.link-row button {
+  flex: 0 0 auto;
+  margin-top: 0.5rem;
+}

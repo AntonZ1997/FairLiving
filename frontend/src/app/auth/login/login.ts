@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { AuthService } from '../auth.service';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
+import { SnackbarService } from '../../snackbar/snackbar-service';
 
 @Component({
   imports: [ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule, MatButton],
@@ -16,9 +17,15 @@ import { MatButton } from '@angular/material/button';
 export class Login {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly formBuilder = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly formBuilder = new FormBuilder();
+  private readonly snackbar = inject(SnackbarService);
+  private readonly redirectTo = this.route.snapshot.queryParamMap.get('redirectTo');
 
-  protected readonly errorMessage = signal<string | null>(null);
+  protected readonly invitationActive = this.redirectTo?.includes('join=') ?? false;
+  protected readonly registerQueryParameters = this.redirectTo
+    ? { redirectTo: this.redirectTo }
+    : {};
   protected readonly submitting = signal(false);
 
   protected readonly form = this.formBuilder.nonNullable.group({
@@ -32,16 +39,21 @@ export class Login {
     }
 
     this.submitting.set(true);
-    this.errorMessage.set(null);
 
     try {
       await this.authService.login(this.form.getRawValue());
-      await this.router.navigate(['/households']);
+      await this.router.navigateByUrl(this.goalUrl());
     } catch (error) {
-      this.errorMessage.set(this.toMessage(error));
+      this.snackbar.error(this.toMessage(error));
     } finally {
       this.submitting.set(false);
     }
+  }
+
+  private goalUrl(): string {
+    return this.redirectTo?.startsWith('/') && !this.redirectTo.startsWith('//')
+      ? this.redirectTo
+      : '/households';
   }
 
   private toMessage(error: unknown) {

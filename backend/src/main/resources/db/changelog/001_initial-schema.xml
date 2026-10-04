@@ -135,6 +135,9 @@
             <column name="base_xp" type="int" >
                 <constraints nullable="false" />
             </column>
+            <column name="weight" type="int">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
         <createTable tableName="task">
             <column name="id" type="uuid">

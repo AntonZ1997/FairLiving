@@ -1,6 +1,14 @@
 <div class="page">
   <h1>Registrieren</h1>
 
+  @if(invitationActive) {
+    <p class="invitation-hint">
+      Du wurdest zu einem Haushalt eingeladen.
+      <br>
+      Registriere dich, um dem Haushalt beizutreten.
+    </p>
+  }
+
   <form [formGroup]="form" (ngSubmit)="submit()">
     <mat-form-field appearance="outline">
       <mat-label>E-Mail</mat-label>
@@ -24,15 +32,11 @@
       <input matInput type="text" formControlName="userName" autocomplete="nickname" />
     </mat-form-field>
 
-    @if (errorMessage()) {
-      <p class="error" role="alert">{{ errorMessage() }}</p>
-    }
-
     <button mat-flat-button type="submit" [disabled]="form.invalid || submitting()">
       {{ submitting() ? 'Registrieren…' : 'Registrieren' }}
     </button>
 
     <p class="hint">Du bist schon Mitglied?<br />Dann melde dich hier an:</p>
-    <a mat-button routerLink="/login">Login</a>
+    <a mat-button routerLink="/login" [queryParams]="loginQueryParameters">Login</a>
   </form>
 </div>

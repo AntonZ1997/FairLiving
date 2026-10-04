@@ -85,3 +85,32 @@ router-outlet + * {
   line-height: 1.1;
 }
 
+.page-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 60%;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: rgb(255 255 255 / 90%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgb(255 255 255 / 45%);
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgb(0 0 0 / 8%);
+  overflow: hidden;
+}
+
+.invitation-hint {
+  margin: 0 0 2rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+:root {
+  --text: #1a1a1a;
+  --muted: #555555;
+  --border: #333333;
+  --link: #1a4fd8;
+  --error: #c62828;
+}

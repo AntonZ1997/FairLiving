@@ -62,7 +62,7 @@ public class HouseholdService {
 
     public List<HouseholdMemberResponse> getMembers(UUID householdId, UUID userId) {
         requireMembership(householdId, userId);
-        return householdMemberRepository.findMembers(householdId);
+        return householdMemberRepository.findMembers(householdId, userId);
     }
 
     public HouseholdPreviewResponse getHouseholdPreview(UUID invitationId, UUID userId) {
@@ -85,12 +85,12 @@ public class HouseholdService {
                 .orElseThrow(() -> new UserIsNotAHouseholdMemberException(householdId, userId));
     }
 
-    private HouseholdMemberRecord requireMembership(UUID householdId, UUID userId) {
+    public HouseholdMemberRecord requireMembership(UUID householdId, UUID userId) {
         return householdMemberRepository.findMembership(householdId, userId)
                 .orElseThrow(() -> new UserIsNotAHouseholdMemberException(householdId, userId));
     }
 
-    private HouseholdMemberRecord requireAdmin(UUID householdId, UUID userId) {
+    public HouseholdMemberRecord requireAdmin(UUID householdId, UUID userId) {
         HouseholdMemberRecord membership = requireMembership(householdId, userId);
         if(HouseholdRole.fromString(membership.getRole()).equals(HouseholdRole.ADMIN)) {
             throw new UserIsNotHouseholdAdminException(householdId, userId);

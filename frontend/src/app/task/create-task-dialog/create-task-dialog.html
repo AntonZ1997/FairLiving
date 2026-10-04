@@ -1,0 +1,65 @@
+<h2 mat-dialog-title>Aufgabe erstellen</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content>
+    <mat-form-field appearance="outline">
+      <mat-label>Name</mat-label>
+      <input matInput type="text" formControlName="name" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Schwierigkeit</mat-label>
+      <mat-select formControlName="difficultyId">
+        @for (difficulty of difficulties(); track difficulty.id) {
+          <mat-option [value]="difficulty.id">
+            {{ difficulty.name }} ({{ difficulty.baseXp }} XP)
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="due">
+      <mat-form-field appearance="outline">
+        <mat-label>Fällig am</mat-label>
+        <input matInput [matDatepicker]="datePicker" [min]="today" formControlName="dueDate" />
+        <mat-datepicker-toggle matSuffix [for]="datePicker" />
+        <mat-datepicker #datePicker />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Uhrzeit</mat-label>
+        <input matInput [matTimepicker]="timePicker" formControlName="dueTime" />
+        <mat-timepicker-toggle matSuffix [for]="timePicker" />
+        <mat-timepicker #timePicker />
+      </mat-form-field>
+    </div>
+
+    @if (form.hasError('dueInPast')) {
+      <p class="error">Die Fälligkeit darf nicht in der Vergangenheit liegen.</p>
+    }
+
+    <mat-checkbox formControlName="recurring">Wiederkehrende Aufgabe</mat-checkbox>
+
+    @if (recurring()) {
+      <mat-form-field appearance="outline">
+        <mat-label>Wiederholung alle … Tage</mat-label>
+        <input matInput type="number" formControlName="intervalDays" min="1" />
+        @if (form.controls.intervalDays.hasError('min')) {
+          <mat-error>Mindestens ein Tag.</mat-error>
+        }
+      </mat-form-field>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Beschreibung (optional)</mat-label>
+      <textarea matInput rows="3" formControlName="description"></textarea>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" [disabled]="submitting()" (click)="cancel()">Abbrechen</button>
+    <button mat-flat-button type="submit" [disabled]="form.invalid || submitting()">
+      {{ submitting() ? 'Erstellen…' : 'Aufgabe erstellen' }}
+    </button>
+  </mat-dialog-actions>
+</form>

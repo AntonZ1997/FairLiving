@@ -1,8 +1,11 @@
 package com.fairliving.backend.household;
 
 import com.fairliving.backend.household.dto.HouseholdMemberResponse;
+import de.fairliving.backend.jooq.tables.Level;
 import de.fairliving.backend.jooq.tables.records.HouseholdMemberRecord;
 import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
@@ -42,7 +45,33 @@ public class HouseholdMemberRepository {
                         .and(HOUSEHOLD_MEMBER.USER_ID.eq(userId))));
     }
 
-    public List<HouseholdMemberResponse> findMembers(UUID householdId) {
+    public Optional<HouseholdMemberRecord> findById(UUID memberId) {
+        return dslContext
+                .selectFrom(HOUSEHOLD_MEMBER)
+                .where(HOUSEHOLD_MEMBER.ID.eq(memberId))
+                .fetchOptionalInto(HouseholdMemberRecord.class);
+    }
+
+    public void updateProgress(UUID memberId, int experiencePoints, int streakCount, UUID levelId) {
+        dslContext
+                .update(HOUSEHOLD_MEMBER)
+                .set(HOUSEHOLD_MEMBER.EXPERIENCE_POINTS, experiencePoints)
+                .set(HOUSEHOLD_MEMBER.STREAK_COUNT, streakCount)
+                .set(HOUSEHOLD_MEMBER.LEVEL_ID, levelId)
+                .where(HOUSEHOLD_MEMBER.ID.eq(memberId))
+                .execute();
+    }
+    public List<HouseholdMemberResponse> findMembers(UUID householdId, UUID currentUserId) {
+        Level nextLevel = LEVEL.as("next_level");
+
+        Field<Boolean> isCurrentUser = DSL.field(HOUSEHOLD_MEMBER.USER_ID.eq(currentUserId)).as("is_current_user");
+
+        Field<Integer> nextLevelRequiredXp = dslContext
+                .select(DSL.min(nextLevel.REQUIRED_XP))
+                .from(nextLevel)
+                .where(nextLevel.REQUIRED_XP.gt(LEVEL.REQUIRED_XP))
+                .asField("next_level_required_xp");
+
         return dslContext
                 .select(
                         HOUSEHOLD_MEMBER.ID,
@@ -52,6 +81,9 @@ public class HouseholdMemberRepository {
                         HOUSEHOLD_MEMBER.STREAK_COUNT,
                         LEVEL.LEVEL_NUMBER,
                         LEVEL.TITLE,
+                        LEVEL.REQUIRED_XP,
+                        nextLevelRequiredXp,
+                        isCurrentUser,
                         HOUSEHOLD_MEMBER.JOINED
                 ).from(HOUSEHOLD_MEMBER)
                 .join(USER).on(USER.ID.eq(HOUSEHOLD_MEMBER.USER_ID))
@@ -67,6 +99,9 @@ public class HouseholdMemberRepository {
                                 r.get(HOUSEHOLD_MEMBER.STREAK_COUNT),
                                 r.get(LEVEL.LEVEL_NUMBER),
                                 r.get(LEVEL.TITLE),
+                                r.get(LEVEL.REQUIRED_XP),
+                                r.get(nextLevelRequiredXp),
+                                r.get(isCurrentUser),
                                 r.get(HOUSEHOLD_MEMBER.JOINED)
                         ));
     }

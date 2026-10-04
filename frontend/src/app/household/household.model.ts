@@ -24,6 +24,9 @@ export interface HouseholdMemberResponse {
   streakCount: number;
   levelNumber: number;
   levelTitle: string;
+  currentLevelRequiredXp: number;
+  nextLevelRequiredXp: number | null;
+  isCurrentUser: boolean;
   joined: string;
 }
 

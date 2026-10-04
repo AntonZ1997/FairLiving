@@ -1,0 +1,88 @@
+@if (loading()) {
+  <mat-spinner diameter="40" />
+} @else if (household(); as household) {
+  <div class="dashboard">
+    <mat-card class="header-bar" appearance="outlined">
+      <mat-card-content class="header-content">
+        <span class="role">
+          @if (me(); as me) {
+            Rolle: {{ roleLabel(me.role) }}
+          }
+        </span>
+
+        <h1>{{ household.name }}</h1>
+
+        <button class="invite" type="button" (click)="openInvitationDialog()"> + Mitglied hinzufügen</button>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="content">
+      <div class="widgets">
+        <mat-card class="widget" appearance="outlined">
+          <mat-card-content>
+            <h2>Mitglieder-Ranking</h2>
+            <ul class="ranking">
+              @for (member of topMembers(); track member.memberId; let index = $index) {
+                <li>
+                  <span class="rank">{{ index + 1 }}.</span>
+                  <span class="name">{{ member.isCurrentUser ? 'Du' : member.userName }}</span>
+                  <span class="level-title">{{ member.levelTitle }}</span>
+                  <span class="level-number">Level {{ member.levelNumber }}</span>
+                </li>
+              }
+            </ul>
+          </mat-card-content>
+        </mat-card>
+
+        <div class="actions">
+          <button mat-stroked-button type="button" disabled>Alle Aufgaben anzeigen</button>
+          <button mat-stroked-button type="button" disabled>Statistiken anzeigen</button>
+        </div>
+
+        @if (me(); as me) {
+          <mat-card class="widget" appearance="outlined">
+            <mat-card-content class="progress">
+              <div class="level-line">
+                <strong>Level {{ me.levelNumber }}</strong>
+                <strong>{{ me.levelTitle }}</strong>
+              </div>
+
+              <mat-progress-bar mode="determinate" [value]="levelProgress()" />
+
+              @if (me.nextLevelRequiredXp !== null) {
+                <p>XP: {{ me.experiencePoints }}/{{ me.nextLevelRequiredXp }}</p>
+              } @else {
+                <p>XP: {{ me.experiencePoints }}</p>
+              }
+
+              <p>Streak: {{ me.streakCount }}</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+
+      <h2 class="section-title">Aufgabe erstellen</h2>
+
+      <button mat-fab type="button" aria-label="Aufgabe erstellen" (click)="openCreateTaskDialog()">
+        <mat-icon>add</mat-icon>
+      </button>
+
+      <h2 class="section-title">{{ openTasksHeadline() }}</h2>
+
+      @if (openTasks().length > 0) {
+        <div class="tasks">
+          @for (task of openTasks(); track task.assignedTaskId) {
+            <mat-card class="task-card" appearance="outlined">
+              <mat-card-content>
+                <h3>{{ task.name }}</h3>
+                <p>Schwierigkeit: {{ task.difficultyName }}</p>
+                <p>XP-Belohnung: {{ task.xpReward }}</p>
+                <p [class.overdue]="isOverdue(task.dueDate)">{{ dueLabel(task.dueDate) }}</p>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
