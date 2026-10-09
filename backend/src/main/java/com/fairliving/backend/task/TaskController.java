@@ -1,14 +1,12 @@
 package com.fairliving.backend.task;
 
-import com.fairliving.backend.task.dto.AssignedTaskResponse;
-import com.fairliving.backend.task.dto.CreateTaskRequest;
-import com.fairliving.backend.task.dto.DifficultyResponse;
-import com.fairliving.backend.task.dto.TaskCompletionResponse;
+import com.fairliving.backend.task.dto.*;
 import com.fairliving.backend.user.CurrentUserProvider;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,5 +44,23 @@ public class TaskController {
     public ResponseEntity<TaskCompletionResponse> completeTask(@PathVariable UUID assignedTaskId, Authentication authentication) {
         UUID userId = currentUserProvider.get(authentication).getId();
         return ResponseEntity.ok(taskService.completeTask(assignedTaskId, userId));
+    }
+
+    @GetMapping("/tasks/{taskId}")
+    public ResponseEntity<TaskDetailResponse> getTaskDetails(@PathVariable UUID taskId, Authentication authentication) {
+        UUID userId = currentUserProvider.get(authentication).getId();
+        return ResponseEntity.ok(taskService.getTaskDetails(taskId, userId));
+    }
+
+    @PostMapping("/tasks/{taskId}/pause")
+    public ResponseEntity<TaskDetailResponse> pauseTask(@PathVariable UUID taskId, Authentication authentication) {
+        UUID userId = currentUserProvider.get(authentication).getId();
+        return ResponseEntity.ok(taskService.deactivateTask(taskId, userId));
+    }
+
+    @PostMapping("/tasks/{taskId}/activate")
+    public ResponseEntity<TaskDetailResponse> activateTask(@PathVariable UUID taskId, @Valid @RequestBody ActivateTaskRequest request, Authentication authentication) {
+        UUID userId = currentUserProvider.get(authentication).getId();
+        return ResponseEntity.ok(taskService.activateTask(taskId, userId, request.dueDate()));
     }
 }

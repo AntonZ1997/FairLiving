@@ -61,6 +61,7 @@ public class AssignedTaskRepository {
         return dslContext
                 .select(
                         ASSIGNED_TASK.ID,
+                        TASK.ID,
                         TASK.NAME,
                         TASK.DESCRIPTION,
                         DIFFICULTY.NAME,
@@ -76,6 +77,7 @@ public class AssignedTaskRepository {
                 .orderBy(ASSIGNED_TASK.DUE_DATE.asc())
                 .fetch(r -> new AssignedTaskResponse(
                         r.get(ASSIGNED_TASK.ID),
+                        r.get(TASK.ID),
                         r.get(TASK.NAME),
                         r.get(TASK.DESCRIPTION),
                         r.get(DIFFICULTY.NAME),
@@ -121,6 +123,14 @@ public class AssignedTaskRepository {
                 .set(ASSIGNED_TASK.STATUS, TaskStatus.COMPLETED.getStatus())
                 .set(ASSIGNED_TASK.COMPLETED_AT, completedAt)
                 .where(ASSIGNED_TASK.ID.eq(assignedTaskId))
+                .execute();
+    }
+
+    public void deleteUncompletedAssignedTaskByTaskId(UUID taskId) {
+        dslContext
+                .deleteFrom(ASSIGNED_TASK)
+                .where(ASSIGNED_TASK.TASK_ID.eq(taskId))
+                .and(ASSIGNED_TASK.STATUS.eq(TaskStatus.OPEN.getStatus()))
                 .execute();
     }
 

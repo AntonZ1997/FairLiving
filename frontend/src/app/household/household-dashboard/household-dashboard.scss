@@ -40,7 +40,7 @@
   justify-self: end;
   border: 0;
   background: none;
-  color: var(--link);
+  color: var(--fl-link);
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -65,14 +65,12 @@
 .widget {
   display: flex;
   flex-direction: column;
-  min-height: 11rem;
 }
 
 .widget mat-card-content {
   display: flex;
   flex: 1;
   flex-direction: column;
-  justify-content: center;
 }
 
 .widget h2 {
@@ -88,28 +86,46 @@
 }
 
 .ranking {
+  display: grid;
+  grid-template-columns: 1.5rem auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem 0.75rem;
   margin: 0;
   padding: 0;
   list-style: none;
+  text-align: left;
 }
 
 .ranking li {
-  display: grid;
-  grid-template-columns: 1.5rem 1fr 1fr auto;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  font-weight: 700;
-  text-align: left;
+  display: contents;
 }
 
 .rank {
   text-align: right;
+  color: var(--fl-muted);
+}
+
+.name {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.level-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  color: var(--fl-muted);
+}
+
+.level-number {
+  text-align: right;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .progress {
-  display: flex;
-  flex-direction: column;
+  justify-content: center;
   gap: 0.75rem;
 }
 
@@ -140,6 +156,15 @@
 
 .task-card {
   width: 15rem;
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.task-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 12%);
 }
 
 .task-card h3 {
@@ -151,7 +176,10 @@
   margin: 0.75rem 0;
 }
 
-.task-card .overdue {
-  color: var(--error);
+.overdue {
+  color: var(--fl-error);
   font-weight: 700;
 }
+
+
+

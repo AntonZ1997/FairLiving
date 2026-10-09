@@ -1,17 +1,11 @@
 package com.fairliving.backend.task;
 
-import com.fairliving.backend.exception.AssignedTaskNotFoundException;
-import com.fairliving.backend.exception.DifficultyNotFoundException;
-import com.fairliving.backend.exception.TaskAlreadyCompletedException;
-import com.fairliving.backend.exception.TaskIsNotAssignedToUserException;
+import com.fairliving.backend.exception.*;
 import com.fairliving.backend.gamification.GamificationService;
 import com.fairliving.backend.gamification.dto.CompletionReward;
 import com.fairliving.backend.household.HouseholdMemberRepository;
 import com.fairliving.backend.household.HouseholdService;
-import com.fairliving.backend.task.dto.AssignedTaskResponse;
-import com.fairliving.backend.task.dto.CreateTaskRequest;
-import com.fairliving.backend.task.dto.DifficultyResponse;
-import com.fairliving.backend.task.dto.TaskCompletionResponse;
+import com.fairliving.backend.task.dto.*;
 import de.fairliving.backend.jooq.tables.records.AssignedTaskRecord;
 import de.fairliving.backend.jooq.tables.records.HouseholdMemberRecord;
 import de.fairliving.backend.jooq.tables.records.TaskRecord;
@@ -121,5 +115,44 @@ public class TaskService {
                 completionReward.leveledUp(),
                 completedOnTime
         );
+    }
+
+    public TaskDetailResponse getTaskDetails(UUID taskId, UUID userId) {
+        TaskRecord task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException(taskId));
+
+        HouseholdMemberRecord householdMember = householdService.requireMembership(task.getHouseholdId(), userId);
+
+        return taskRepository.fetchTaskDetails(taskId, householdMember.getId())
+                .orElseThrow(() -> new TaskNotFoundException(taskId));
+    }
+
+    @Transactional
+    public TaskDetailResponse deactivateTask(UUID taskId, UUID userId) {
+        TaskRecord task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException(taskId));
+
+        HouseholdMemberRecord householdMember = householdService.requireMembership(task.getHouseholdId(), userId);
+
+        taskRepository.setActive(taskId, false);
+
+        assignedTaskRepository.deleteUncompletedAssignedTaskByTaskId(taskId);
+
+        return taskRepository.fetchTaskDetails(taskId, householdMember.getId()).orElseThrow();
+    }
+
+    @Transactional
+    public TaskDetailResponse activateTask(UUID taskId, UUID userId, Instant dueDate) {
+        TaskRecord task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException(taskId));
+
+        HouseholdMemberRecord householdMember = householdService.requireMembership(task.getHouseholdId(), userId);
+
+        taskRepository.setActive(taskId, true);
+
+        UUID assignedMemberId = taskDistributionService.determineHouseholdMemberForTask(task.getHouseholdId());
+        assignedTaskRepository.insert(task.getId(), assignedMemberId, dueDate);
+
+        return taskRepository.fetchTaskDetails(taskId, householdMember.getId()).orElseThrow();
     }
 }

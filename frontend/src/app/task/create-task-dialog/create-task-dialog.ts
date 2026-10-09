@@ -2,10 +2,8 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import {
-  AbstractControl,
   FormBuilder,
   ReactiveFormsModule,
-  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
@@ -32,23 +30,7 @@ import {
 import { TaskService } from '../task-service';
 import { AssignedTaskResponse, DifficultyResponse } from '../task.model';
 import { SnackbarService } from '../../snackbar/snackbar-service';
-
-function combineDateAndTime(date: Date, time: Date): Date {
-  const combined = new Date(date);
-  combined.setHours(time.getHours(), time.getMinutes(), 0, 0);
-  return combined;
-}
-
-function dueInFuture(group: AbstractControl): ValidationErrors | null {
-  const date = group.get('dueDate')?.value as Date | null;
-  const time = group.get('dueTime')?.value as Date | null;
-
-  if (!date || !time) {
-    return null;
-  }
-
-  return combineDateAndTime(date, time).getTime() > Date.now() ? null : { dueInPast: true };
-}
+import { combineDateAndTime, dueInFuture } from '../due-date';
 
 @Component({
   imports: [

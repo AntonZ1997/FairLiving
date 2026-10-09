@@ -1,0 +1,64 @@
+@if (loading()) {
+  <mat-spinner diameter="40" />
+} @else if (task(); as task) {
+  <div class="dialog-header">
+    @if (task.active) {
+      <button mat-icon-button type="button" aria-label="Aufgabe pausieren"
+              [disabled]="busy()" (click)="pause()">
+        <mat-icon>pause</mat-icon>
+      </button>
+    }
+
+    <h2 mat-dialog-title>{{ task.name }}</h2>
+
+    <button mat-icon-button type="button" aria-label="Schließen" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    @if (task.active) {
+      @if (task.dueDate) {
+        <p class="status" [class.overdue]="isOverdue(task.dueDate)">{{ dueLabel(task.dueDate) }}</p>
+      }
+      @if (task.assignedMemberName) {
+        <p class="status">Zugewiesen an {{ task.assignedMemberName }}</p>
+      }
+    } @else {
+      <p class="status">Aufgabe pausiert</p>
+    }
+
+    <dl class="details">
+      <dt>Schwierigkeit</dt>
+      <dd>{{ task.difficultyName }}</dd>
+
+      <dt>XP-Belohnung</dt>
+      <dd>{{ task.xpReward }}</dd>
+
+      @if (task.dueDate) {
+        <dt>Fällig am</dt>
+        <dd>{{ task.dueDate | date: 'dd.MM.yyyy, HH:mm' }}</dd>
+      }
+
+      <dt>Wiederholung</dt>
+      <dd>{{ task.intervalDays > 0 ? 'alle ' + task.intervalDays + ' Tage' : 'einmalig' }}</dd>
+
+      <dt>Von dir erledigt</dt>
+      <dd>{{ task.completedByCurrentUser }}×</dd>
+    </dl>
+
+    @if (task.description) {
+      <p class="description">{{ task.description }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="center">
+    @if (task.active && task.assignedToCurrentUser) {
+      <button mat-flat-button type="button" [disabled]="busy()" (click)="complete()">
+        {{ busy() ? 'Wird abgeschlossen…' : 'Aufgabe abschließen' }}
+      </button>
+    } @else {
+      <button mat-flat-button type="button" (click)="close()">Schließen</button>
+    }
+  </mat-dialog-actions>
+}

@@ -41,7 +41,7 @@ mat-form-field {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding-right: 0.5rem;
+  padding: 1rem;
 }
 
 .households {
@@ -55,6 +55,13 @@ mat-form-field {
 
 .card {
   width: 17rem;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 12%);
 }
 
 .card a {

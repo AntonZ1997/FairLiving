@@ -15,6 +15,8 @@ import { AssignedTaskResponse } from '../../task/task.model';
 import { CreateTaskDialog } from '../../task/create-task-dialog/create-task-dialog';
 import { firstValueFrom } from 'rxjs';
 import { TaskService } from '../../task/task-service';
+import { dueLabel, isOverdue } from '../../task/due-date';
+import { TaskDetailDialog } from '../../task/task-detail-dialog/task-detail-dialog';
 
 @Component({
   imports: [
@@ -44,7 +46,8 @@ export class HouseholdDashboard {
   protected readonly openTasks = signal<AssignedTaskResponse[]>([]);
   protected readonly loading = signal(true);
   protected readonly topMembers = computed(() => this.members().slice(0, 3));
-
+  protected readonly isOverdue = isOverdue;
+  protected readonly dueLabel = dueLabel;
   protected readonly me = computed(
     () => this.members().find((member) => member.isCurrentUser) ?? null,
   );
@@ -120,46 +123,24 @@ export class HouseholdDashboard {
     }
   }
 
-  protected isOverdue(dueDate: string): boolean {
-    return new Date(dueDate).getTime() < Date.now();
+  protected async openTaskDetails(taskId: string): Promise<void> {
+    const dialogRef = this.dialog.open<TaskDetailDialog, string>(TaskDetailDialog, {
+      data: taskId,
+      width: '520px',
+    });
+
+    await firstValueFrom(dialogRef.afterClosed());
+    await this.reloadTasksAndMembers();
   }
 
-  protected dueLabel(dueDate: string): string {
-    const days = this.calendarDaysUntil(dueDate);
+  private async reloadTasksAndMembers(): Promise<void> {
+    const [openTasks, members] = await Promise.all([
+      this.taskService.findOpenTasks(this.householdId()),
+      this.householdService.findMembers(this.householdId()),
+    ]);
 
-    if (days === 0) {
-      return this.hourLabel(dueDate);
-    }
-
-    const absoluteDays = Math.abs(days);
-    const unit = absoluteDays === 1 ? 'Tag' : 'Tagen';
-
-    return this.isOverdue(dueDate)
-      ? `Fällig seit ${absoluteDays} ${unit}`
-      : `Fällig in ${absoluteDays} ${unit}`;
-  }
-
-  private hourLabel(dueDate: string): string {
-    const differenceMilliseconds = new Date(dueDate).getTime() - Date.now();
-    const hours = Math.floor(Math.abs(differenceMilliseconds) / 3_600_000);
-    const unit = hours === 1 ? 'Stunde' : 'Stunden';
-
-    if (differenceMilliseconds < 0) {
-      return hours === 0
-        ? 'Seit weniger als einer Stunde überfällig'
-        : `Überfällig seit ${hours} ${unit}`;
-    }
-
-    return hours === 0 ? 'Fällig in weniger als einer Stunde' : `Fällig in ${hours} ${unit}`;
-  }
-
-  private calendarDaysUntil(dueDate: string): number {
-    const due = new Date(dueDate);
-    const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate());
-    const today = new Date();
-    const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-    return Math.round((dueDay.getTime() - todayDay.getTime()) / 86_400_000);
+    this.openTasks.set(openTasks);
+    this.members.set(members);
   }
 
   protected roleLabel(role: HouseholdRole): string {

@@ -26,7 +26,7 @@
                 <li>
                   <span class="rank">{{ index + 1 }}.</span>
                   <span class="name">{{ member.isCurrentUser ? 'Du' : member.userName }}</span>
-                  <span class="level-title">{{ member.levelTitle }}</span>
+                  <span class="level-title" [title]="member.levelTitle">{{ member.levelTitle }}</span>
                   <span class="level-number">Level {{ member.levelNumber }}</span>
                 </li>
               }
@@ -72,7 +72,7 @@
       @if (openTasks().length > 0) {
         <div class="tasks">
           @for (task of openTasks(); track task.assignedTaskId) {
-            <mat-card class="task-card" appearance="outlined">
+            <mat-card class="task-card" appearance="outlined" (click)="openTaskDetails(task.taskId)">
               <mat-card-content>
                 <h3>{{ task.name }}</h3>
                 <p>Schwierigkeit: {{ task.difficultyName }}</p>

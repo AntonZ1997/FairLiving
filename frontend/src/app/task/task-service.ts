@@ -2,10 +2,12 @@ import { Service, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import {
+  ActivateTaskRequest,
   AssignedTaskResponse,
   CreateTaskRequest,
   DifficultyResponse,
   TaskCompletionResponse,
+  TaskDetailResponse,
 } from './task.model';
 
 @Service()
@@ -36,4 +38,18 @@ export class TaskService {
       ),
     );
   }
+
+  async findTaskDetails(taskId: string): Promise<TaskDetailResponse> {
+    return firstValueFrom(this.http.get<TaskDetailResponse>(`/api/tasks/${taskId}`));
+  }
+
+  async pauseTask(taskId: string): Promise<TaskDetailResponse> {
+    return firstValueFrom(this.http.post<TaskDetailResponse>(`/api/tasks/${taskId}/pause`, null)) ;
+  }
+
+  async activateTask(taskId: string, request: ActivateTaskRequest): Promise<TaskDetailResponse> {
+    return firstValueFrom(this.http.post<TaskDetailResponse>(`/api/tasks/${taskId}/activate`, request));
+  }
+
+
 }
