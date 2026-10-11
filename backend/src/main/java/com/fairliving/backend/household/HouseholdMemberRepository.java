@@ -41,8 +41,8 @@ public class HouseholdMemberRepository {
     public boolean exists(UUID householdId, UUID userId) {
         return dslContext.fetchExists(
                 dslContext.selectFrom(HOUSEHOLD_MEMBER)
-                .where(HOUSEHOLD_MEMBER.HOUSEHOLD_ID.eq(householdId)
-                        .and(HOUSEHOLD_MEMBER.USER_ID.eq(userId))));
+                        .where(HOUSEHOLD_MEMBER.HOUSEHOLD_ID.eq(householdId)
+                                .and(HOUSEHOLD_MEMBER.USER_ID.eq(userId))));
     }
 
     public Optional<HouseholdMemberRecord> findById(UUID memberId) {
@@ -61,6 +61,7 @@ public class HouseholdMemberRepository {
                 .where(HOUSEHOLD_MEMBER.ID.eq(memberId))
                 .execute();
     }
+
     public List<HouseholdMemberResponse> findMembers(UUID householdId, UUID currentUserId) {
         Level nextLevel = LEVEL.as("next_level");
 
@@ -120,6 +121,13 @@ public class HouseholdMemberRepository {
                         dslContext.selectFrom(HOUSEHOLD_MEMBER)
                                 .where(HOUSEHOLD_MEMBER.HOUSEHOLD_ID.eq(householdId))
                 );
+    }
+
+    public void delete(UUID memberId) {
+        dslContext
+                .deleteFrom(HOUSEHOLD_MEMBER)
+                .where(HOUSEHOLD_MEMBER.ID.eq(memberId))
+                .execute();
     }
 
 }

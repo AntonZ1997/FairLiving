@@ -1,0 +1,73 @@
+<div class="page-card">
+  @if (loading()) {
+    <mat-spinner diameter="40" />
+  } @else if (household(); as household) {
+    <header class="members-head">
+      <a mat-button [routerLink]="['/households', householdId()]">
+        <mat-icon>arrow_back</mat-icon>
+        Zum Dashboard
+      </a>
+
+      <h1>{{ household.name }} - Mitglieder</h1>
+
+      <button mat-flat-button type="button" (click)="openInvitationDialog()">
+        Mitglied hinzufügen
+      </button>
+    </header>
+
+    <div class="scroll-area">
+      <table mat-table [dataSource]="members()">
+        <ng-container matColumnDef="userName">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let member">
+            {{ member.userName }}@if (member.isCurrentUser) {
+            <span class="you">(Du)</span>
+          }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef>Rolle</th>
+          <td mat-cell *matCellDef="let member">{{ roleLabel(member.role) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="levelNumber">
+          <th mat-header-cell *matHeaderCellDef>Level</th>
+          <td mat-cell *matCellDef="let member">{{ member.levelNumber }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="levelTitle">
+          <th mat-header-cell *matHeaderCellDef>Titel</th>
+          <td mat-cell *matCellDef="let member">{{ member.levelTitle }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="joined">
+          <th mat-header-cell *matHeaderCellDef>Beigetreten am</th>
+          <td mat-cell *matCellDef="let member">{{ member.joined | date: 'dd.MM.yyyy' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let member">
+            @if (!member.isCurrentUser) {
+              <button mat-icon-button type="button" aria-label="Optionen"
+                      [matMenuTriggerFor]="rowMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+
+              <mat-menu #rowMenu="matMenu">
+                <button mat-menu-item type="button" (click)="removeMember(member)">
+                  <mat-icon>person_remove</mat-icon>
+                  <span>Mitglied entfernen</span>
+                </button>
+              </mat-menu>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
+      </table>
+    </div>
+  }
+</div>

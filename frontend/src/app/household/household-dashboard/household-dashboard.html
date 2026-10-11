@@ -1,7 +1,7 @@
 @if (loading()) {
   <mat-spinner diameter="40" />
 } @else if (household(); as household) {
-  <div class="dashboard">
+  <div class="page-card dashboard">
     <mat-card class="header-bar" appearance="outlined">
       <mat-card-content class="header-content">
         <span class="role">
@@ -12,26 +12,28 @@
 
         <h1>{{ household.name }}</h1>
 
-        <button class="invite" type="button" (click)="openInvitationDialog()"> + Mitglied hinzufügen</button>
+        <button class="invite" type="button" (click)="openInvitationDialog()">Mitglied hinzufügen</button>
       </mat-card-content>
     </mat-card>
 
     <div class="content">
       <div class="widgets">
-        <mat-card class="widget" appearance="outlined">
-          <mat-card-content>
-            <h2>Mitglieder-Ranking</h2>
-            <ul class="ranking">
-              @for (member of topMembers(); track member.memberId; let index = $index) {
-                <li>
-                  <span class="rank">{{ index + 1 }}.</span>
-                  <span class="name">{{ member.isCurrentUser ? 'Du' : member.userName }}</span>
-                  <span class="level-title" [title]="member.levelTitle">{{ member.levelTitle }}</span>
-                  <span class="level-number">Level {{ member.levelNumber }}</span>
-                </li>
-              }
-            </ul>
-          </mat-card-content>
+        <mat-card class="widget ranking-card" appearance="outlined">
+          <a [routerLink]="['/households', householdId(), 'members']">
+            <mat-card-content>
+              <h2>Mitglieder-Ranking</h2>
+              <ul class="ranking">
+                @for (member of topMembers(); track member.memberId; let index = $index) {
+                  <li>
+                    <span class="rank">{{ index + 1 }}.</span>
+                    <span class="name">{{ member.isCurrentUser ? 'Du' : member.userName }}</span>
+                    <span class="level-title" [title]="member.levelTitle">{{ member.levelTitle }}</span>
+                    <span class="level-number">Level {{ member.levelNumber }}</span>
+                  </li>
+                }
+              </ul>
+            </mat-card-content>
+          </a>
         </mat-card>
 
         <div class="actions">

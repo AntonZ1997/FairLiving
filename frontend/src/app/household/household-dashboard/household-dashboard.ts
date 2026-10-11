@@ -1,7 +1,7 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { HouseholdService } from '../household-service';
 import { SnackbarService } from '../../snackbar/snackbar-service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HouseholdMemberResponse, HouseholdResponse, HouseholdRole } from '../household.model';
 import { clearLastHouseholdId, setLastHouseholdId } from '../household-selection-service';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -27,6 +27,7 @@ import { TaskDetailDialog } from '../../task/task-detail-dialog/task-detail-dial
     MatProgressBar,
     MatIcon,
     MatFabButton,
+    RouterLink,
   ],
   selector: 'app-household-dashboard',
   styleUrl: './household-dashboard.scss',

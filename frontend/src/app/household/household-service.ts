@@ -8,7 +8,7 @@ import {
 } from './household.model';
 import { firstValueFrom } from 'rxjs';
 
-const BASE_URL = '/api/households'
+const BASE_URL = '/api/households';
 
 @Service()
 export class HouseholdService {
@@ -33,12 +33,18 @@ export class HouseholdService {
   }
 
   async join(invitationId: string): Promise<HouseholdResponse> {
-    return firstValueFrom(
-      this.http.post<HouseholdResponse>(`${BASE_URL}/join`, { invitationId }),
-    );
+    return firstValueFrom(this.http.post<HouseholdResponse>(`${BASE_URL}/join`, { invitationId }));
   }
 
   async preview(invitationId: string): Promise<HouseholdPreviewResponse> {
-    return firstValueFrom(this.http.get<HouseholdPreviewResponse>(`${BASE_URL}/invitations/${encodeURIComponent(invitationId)}`));
+    return firstValueFrom(
+      this.http.get<HouseholdPreviewResponse>(
+        `${BASE_URL}/invitations/${encodeURIComponent(invitationId)}`,
+      ),
+    );
+  }
+
+  async removeMember(householdId: string, memberId: string): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${BASE_URL}/${householdId}/members/${memberId}`));
   }
 }

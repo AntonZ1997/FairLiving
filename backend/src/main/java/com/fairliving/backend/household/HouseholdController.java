@@ -52,6 +52,13 @@ public class HouseholdController {
         return ResponseEntity.ok(householdService.getMembers(householdId, userId));
     }
 
+    @DeleteMapping("/{householdId}/members/{memberId}")
+    public ResponseEntity<Void> removeMember(@PathVariable UUID householdId, @PathVariable UUID memberId, Authentication authentication) {
+        UUID userId = currentUserProvider.get(authentication).getId();
+        householdService.removeMember(householdId, memberId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/invitations/{invitationId}")
     public ResponseEntity<HouseholdPreviewResponse> previewHousehold(@PathVariable UUID invitationId, Authentication authentication) {
         UUID userId = currentUserProvider.get(authentication).getId();

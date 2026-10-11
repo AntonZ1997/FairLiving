@@ -8,7 +8,7 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   {
     path: 'register',
-    loadComponent: () => import('./auth/register/register').then(m => m.Register)
+    loadComponent: () => import('./auth/register/register').then((m) => m.Register),
   },
   {
     path: '',
@@ -20,23 +20,33 @@ export const routes: Routes = [
         redirectTo: () => {
           const householdId = getLastHouseholdId();
           return householdId ? `/households/${householdId}` : '/households';
-        }
+        },
       },
       {
         path: 'join/:invitationId',
-        redirectTo: route => `/households?join=${encodeURIComponent(route.params['invitationId'])}`
+        redirectTo: (route) =>
+          `/households?join=${encodeURIComponent(route.params['invitationId'])}`,
       },
       {
         path: 'households',
         canActivate: [forgetHouseholdGuard],
-        loadComponent: () => import('./household/household-list/household-list').then(m => m.HouseholdList)
+        loadComponent: () =>
+          import('./household/household-list/household-list').then((m) => m.HouseholdList),
       },
       {
         path: 'households/:householdId',
         canActivate: [rememberHouseholdGuard],
-        loadComponent: () => import('./household/household-dashboard/household-dashboard').then(m => m.HouseholdDashboard),
-      }
-    ]
+        loadComponent: () =>
+          import('./household/household-dashboard/household-dashboard').then(
+            (m) => m.HouseholdDashboard,
+          ),
+      },
+      {
+        path: 'households/:householdId/members',
+        loadComponent: () =>
+          import('./household/household-members/household-members').then((m) => m.HouseholdMembers),
+      },
+    ],
   },
-  {path: '**', redirectTo: ''}
+  { path: '**', redirectTo: '' },
 ];

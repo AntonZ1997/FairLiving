@@ -134,4 +134,22 @@ public class AssignedTaskRepository {
                 .execute();
     }
 
+    public List<UUID> findOpenAssignedTaskIdsByMemberId(UUID memberId) {
+        return dslContext
+                .select(ASSIGNED_TASK.ID)
+                .from(ASSIGNED_TASK)
+                .where(ASSIGNED_TASK.ASSIGNED_MEMBER_ID.eq(memberId))
+                .and(ASSIGNED_TASK.STATUS.eq(TaskStatus.OPEN.getStatus()))
+                .fetch(r -> r.get(ASSIGNED_TASK.ID));
+
+    }
+
+    public void reassign(UUID assignedTaskId, UUID newMemberId) {
+        dslContext
+                .update(ASSIGNED_TASK)
+                .set(ASSIGNED_TASK.ASSIGNED_MEMBER_ID, newMemberId)
+                .where(ASSIGNED_TASK.ID.eq(assignedTaskId))
+                .execute();
+    }
+
 }

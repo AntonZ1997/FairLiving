@@ -125,7 +125,7 @@ export class CreateTaskDialog implements OnInit {
 
   private toMessage(error: unknown): string {
     if (error instanceof HttpErrorResponse && error.status === HttpStatusCode.BadRequest) {
-      return 'Bitte die Eingaben prüfen — die Fälligkeit darf nicht in der Vergangenheit liegen.';
+      return 'Die Fälligkeit darf nicht in der Vergangenheit liegen.';
     }
     return 'Aufgabe konnte nicht erstellt werden. Bitte später erneut versuchen.';
   }

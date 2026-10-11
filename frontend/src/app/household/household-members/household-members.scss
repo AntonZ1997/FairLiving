@@ -1,0 +1,47 @@
+:host {
+  padding: 2rem;
+}
+
+.members-head {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+}
+
+.members-head > :first-child {
+  justify-self: start;
+}
+
+.members-head > :last-child {
+  justify-self: end;
+}
+
+.members-head h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.scroll-area {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgb(0 0 0 / 10%);
+}
+
+table {
+  width: 100%;
+  background: transparent;
+}
+
+tr.mat-mdc-row:hover {
+  background: rgb(0 0 0 / 3%);
+}
+
+.you {
+  margin-left: 0.5rem;
+  color: var(--muted);
+}

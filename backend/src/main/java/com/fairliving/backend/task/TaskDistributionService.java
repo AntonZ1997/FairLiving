@@ -22,10 +22,17 @@ public class TaskDistributionService {
     }
 
     public UUID determineHouseholdMemberForTask(UUID householdId) {
-        Instant completedSince = Instant.now().minus(WORKLOAD_WINDOW_DAYS, ChronoUnit.DAYS);
-        List<MemberWorkload> workloads = assignedTaskRepository.findWorkloads(householdId, completedSince);
+        return determineHouseholdMemberForTask(householdId, null);
+    }
 
-        if(workloads.isEmpty()) {
+    public UUID determineHouseholdMemberForTask(UUID householdId, UUID excludedMemberId) {
+        Instant completedSince = Instant.now().minus(WORKLOAD_WINDOW_DAYS, ChronoUnit.DAYS);
+        List<MemberWorkload> workloads = assignedTaskRepository.findWorkloads(householdId, completedSince)
+                .stream()
+                .filter(member -> !member.memberId().equals(excludedMemberId))
+                .toList();
+
+        if (workloads.isEmpty()) {
             throw new IllegalArgumentException("No workloads found for household: " + householdId);
         }
 
@@ -41,4 +48,6 @@ public class TaskDistributionService {
                 .orElseThrow()
                 .memberId();
     }
+
+
 }

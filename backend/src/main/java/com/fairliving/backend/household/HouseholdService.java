@@ -1,11 +1,10 @@
 package com.fairliving.backend.household;
 
-import com.fairliving.backend.exception.InvalidInvitationIdException;
-import com.fairliving.backend.exception.UserIsAlreadyHouseholdMemberException;
-import com.fairliving.backend.exception.UserIsNotAHouseholdMemberException;
-import com.fairliving.backend.exception.UserIsNotHouseholdAdminException;
+import com.fairliving.backend.exception.*;
 import com.fairliving.backend.gamification.GamificationService;
 import com.fairliving.backend.household.dto.*;
+import com.fairliving.backend.task.AssignedTaskRepository;
+import com.fairliving.backend.task.TaskDistributionService;
 import de.fairliving.backend.jooq.tables.records.HouseholdMemberRecord;
 import de.fairliving.backend.jooq.tables.records.HouseholdRecord;
 import de.fairliving.backend.jooq.tables.records.LevelRecord;
@@ -24,11 +23,15 @@ public class HouseholdService {
     private final HouseholdRepository householdRepository;
     private final HouseholdMemberRepository householdMemberRepository;
     private final GamificationService gamificationService;
+    private final AssignedTaskRepository assignedTaskRepository;
+    private final TaskDistributionService taskDistributionService;
 
-    public HouseholdService(HouseholdRepository householdRepository,  HouseholdMemberRepository householdMemberRepository, GamificationService gamificationService) {
-         this.householdRepository = householdRepository;
-         this.householdMemberRepository = householdMemberRepository;
-         this.gamificationService = gamificationService;
+    public HouseholdService(HouseholdRepository householdRepository, HouseholdMemberRepository householdMemberRepository, GamificationService gamificationService, AssignedTaskRepository assignedTaskRepository, TaskDistributionService taskDistributionService) {
+        this.householdRepository = householdRepository;
+        this.householdMemberRepository = householdMemberRepository;
+        this.gamificationService = gamificationService;
+        this.assignedTaskRepository = assignedTaskRepository;
+        this.taskDistributionService = taskDistributionService;
     }
 
     @Transactional
@@ -43,13 +46,13 @@ public class HouseholdService {
         HouseholdRecord household = householdRepository.findByInvitationId(joinHouseholdRequest.invitationId())
                 .orElseThrow(InvalidInvitationIdException::new);
 
-        if(householdMemberRepository.exists(household.getId(), userId)) {
+        if (householdMemberRepository.exists(household.getId(), userId)) {
             throw new UserIsAlreadyHouseholdMemberException(household.getId(), userId);
         }
 
         try {
             addMember(household.getId(), userId, HouseholdRole.MEMBER);
-        } catch(DuplicateKeyException e) {
+        } catch (DuplicateKeyException e) {
             throw new UserIsAlreadyHouseholdMemberException(household.getId(), userId);
         }
 
@@ -92,10 +95,30 @@ public class HouseholdService {
 
     public HouseholdMemberRecord requireAdmin(UUID householdId, UUID userId) {
         HouseholdMemberRecord membership = requireMembership(householdId, userId);
-        if(HouseholdRole.fromString(membership.getRole()).equals(HouseholdRole.ADMIN)) {
+        if (!HouseholdRole.fromString(membership.getRole()).equals(HouseholdRole.ADMIN)) {
             throw new UserIsNotHouseholdAdminException(householdId, userId);
         }
         return membership;
+    }
+
+    @Transactional
+    public void removeMember(UUID householdId, UUID memberId, UUID currentUserId) {
+        HouseholdMemberRecord admin = requireMembership(householdId, currentUserId);
+
+        if (admin.getId().equals(memberId)) {
+            throw new CannotRemoveSelfException(memberId);
+        }
+
+        householdMemberRepository.findById(memberId)
+                .filter(member -> member.getHouseholdId().equals(householdId))
+                .orElseThrow(() -> new UserIsNotAHouseholdMemberException(householdId, memberId));
+
+        for (UUID assignedTaskId : assignedTaskRepository.findOpenAssignedTaskIdsByMemberId(memberId)) {
+            UUID otherHouseholdMember = taskDistributionService.determineHouseholdMemberForTask(householdId, memberId);
+            assignedTaskRepository.reassign(assignedTaskId, otherHouseholdMember);
+        }
+
+        householdMemberRepository.delete(memberId);
     }
 
 

@@ -92,12 +92,12 @@ router-outlet + * {
   width: 60%;
   margin: 0 auto;
   padding: 1.5rem;
-  background: rgb(255 255 255 / 90%);
+  background: rgb(255 255 255 / 65%);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgb(255 255 255 / 45%);
   border-radius: 16px;
-  box-shadow: 0 2px 16px rgb(0 0 0 / 9%);
+  box-shadow: 0 2px 16px rgb(0 0 0 / 8%);
   overflow: hidden;
 }
 
