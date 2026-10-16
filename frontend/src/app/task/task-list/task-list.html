@@ -1,0 +1,92 @@
+<div class="page-card">
+  @if (household(); as household) {
+    <header class="tasks-head">
+      <a mat-button [routerLink]="['/households', householdId()]">
+        <mat-icon>arrow_back</mat-icon>
+        Zum Dashboard
+      </a>
+
+      <h1>{{ household.name }} - Aufgaben</h1>
+
+      <button mat-flat-button type="button" (click)="openCreateTaskDialog()">
+        Neue Aufgabe erstellen
+      </button>
+    </header>
+
+    <div class="table-area">
+      <div class="toolbar">
+        <mat-form-field class="filter" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Anzeige</mat-label>
+          <mat-select [value]="filter()" (valueChange)="changeFilter($event)">
+            <mat-option value="open">Offene Aufgaben</mat-option>
+            <mat-option value="paused">Pausierte Aufgaben</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field class="search" appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Aufgabe suchen</mat-label>
+          <mat-icon matIconPrefix>search</mat-icon>
+          <input matInput #searchInput type="search" [value]="searchTerm()"
+                 (input)="searchTerm.set(searchInput.value)" />
+          @if (searchTerm()) {
+            <button matIconSuffix mat-icon-button type="button" aria-label="Suche zurücksetzen"
+                    (click)="searchTerm.set('')">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </mat-form-field>
+      </div>
+
+      @if (loading()) {
+        <mat-spinner diameter="40" />
+      } @else if (visibleTasks().length === 0) {
+        <p class="empty">{{ emptyMessage() }}</p>
+      } @else {
+        <div class="scroll-area">
+          <table mat-table [dataSource]="visibleTasks()"
+                 matSort matSortActive="dueDate" matSortDirection="asc"
+                 (matSortChange)="sort.set($event)">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+              <td mat-cell *matCellDef="let task">{{ task.name }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="difficultyName">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Schwierigkeit</th>
+              <td mat-cell *matCellDef="let task">{{ task.difficultyName }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="dueDate">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Fällig am</th>
+              <td mat-cell *matCellDef="let task">
+                @if (task.dueDate) {
+                  <span [class.overdue]="isOverdue(task.dueDate)">
+                    {{ task.dueDate | date: 'dd.MM.yyyy, HH:mm' }}
+                  </span>
+                } @else {
+                  <span class="none">-</span>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="intervalDays">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Wiederholung</th>
+              <td mat-cell *matCellDef="let task">{{ intervalLabel(task.intervalDays) }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="assignedMemberName">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Zugewiesen an</th>
+              <td mat-cell *matCellDef="let task">{{ task.assignedMemberName ?? '-' }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"
+                (click)="openTaskDetails(row.taskId)"></tr>
+          </table>
+        </div>
+      }
+    </div>
+  } @else {
+    <mat-spinner diameter="40" />
+  }
+</div>

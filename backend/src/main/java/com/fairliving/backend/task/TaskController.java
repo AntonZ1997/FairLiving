@@ -6,7 +6,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,6 +33,12 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getOpenTasksForUser(householdId, userId));
     }
 
+    @GetMapping("/households/{householdId}/tasks")
+    public ResponseEntity<List<TaskListItemResponse>> getTasks(@PathVariable UUID householdId, @RequestParam(defaultValue = "true") boolean active, Authentication authentication) {
+        UUID userId = currentUserProvider.get(authentication).getId();
+        return ResponseEntity.ok(taskService.getTasks(householdId, userId, active));
+    }
+
     @PostMapping("/households/{householdId}/tasks")
     public ResponseEntity<AssignedTaskResponse> createTask(@PathVariable UUID householdId, @Valid @RequestBody CreateTaskRequest request, Authentication authentication) {
         UUID userId = currentUserProvider.get(authentication).getId();
@@ -58,9 +63,9 @@ public class TaskController {
         return ResponseEntity.ok(taskService.deactivateTask(taskId, userId));
     }
 
-    @PostMapping("/tasks/{taskId}/activate")
-    public ResponseEntity<TaskDetailResponse> activateTask(@PathVariable UUID taskId, @Valid @RequestBody ActivateTaskRequest request, Authentication authentication) {
+    @PutMapping("/tasks/{taskId}")
+    public ResponseEntity<TaskDetailResponse> updateTask(@PathVariable UUID taskId, @Valid @RequestBody UpdateTaskRequest request, Authentication authentication) {
         UUID userId = currentUserProvider.get(authentication).getId();
-        return ResponseEntity.ok(taskService.activateTask(taskId, userId, request.dueDate()));
+        return ResponseEntity.ok(taskService.updateTask(taskId, userId, request));
     }
 }

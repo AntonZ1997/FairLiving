@@ -7,7 +7,7 @@ export interface DifficultyResponse {
 
 export interface AssignedTaskResponse {
   assignedTaskId: string;
-  taskId: string
+  taskId: string;
   name: string;
   description: string | null;
   difficultyName: string;
@@ -24,8 +24,12 @@ export interface CreateTaskRequest {
   intervalDays: number;
 }
 
-export interface ActivateTaskRequest {
-  dueDate: string;
+export interface UpdateTaskRequest {
+  name: string;
+  description: string | null;
+  difficultyId: string;
+  intervalDays: number;
+  dueDate: string | null;
 }
 
 export interface TaskCompletionResponse {
@@ -42,6 +46,7 @@ export interface TaskDetailResponse {
   taskId: string;
   name: string;
   description: string | null;
+  difficultyId: string;
   difficultyName: string;
   xpReward: number;
   intervalDays: number;
@@ -51,4 +56,14 @@ export interface TaskDetailResponse {
   dueDate: string | null;
   assignedToCurrentUser: boolean;
   completedByCurrentUser: number;
+}
+
+export interface TaskListItemResponse {
+  taskId: string;
+  name: string;
+  difficultyName: string;
+  difficultyWeight: number;
+  intervalDays: number;
+  dueDate: string | null;
+  assignedMemberName: string | null;
 }

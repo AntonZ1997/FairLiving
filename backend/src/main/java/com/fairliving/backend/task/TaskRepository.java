@@ -1,12 +1,14 @@
 package com.fairliving.backend.task;
 
 import com.fairliving.backend.task.dto.TaskDetailResponse;
+import com.fairliving.backend.task.dto.TaskListItemResponse;
 import de.fairliving.backend.jooq.tables.AssignedTask;
 import de.fairliving.backend.jooq.tables.records.TaskRecord;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,6 +38,16 @@ public class TaskRepository {
         taskRecord.setActive(true);
         taskRecord.store();
         return taskRecord;
+    }
+
+    public void update(UUID taskId, String name, String description, UUID difficultyId, int intervalDays) {
+        dslContext.update(TASK)
+                .set(TASK.NAME, name)
+                .set(TASK.DESCRIPTION, description)
+                .set(TASK.DIFFICULTY_ID, difficultyId)
+                .set(TASK.INTERVAL_DAYS, intervalDays)
+                .where(TASK.ID.eq(taskId))
+                .execute();
     }
 
     public Optional<TaskRecord> findById(UUID id) {
@@ -70,6 +82,7 @@ public class TaskRepository {
                         TASK.DESCRIPTION,
                         TASK.INTERVAL_DAYS,
                         TASK.ACTIVE,
+                        DIFFICULTY.ID,
                         DIFFICULTY.NAME,
                         DIFFICULTY.BASE_XP,
                         ASSIGNED_TASK.ID,
@@ -88,6 +101,7 @@ public class TaskRepository {
                         r.get(TASK.ID),
                         r.get(TASK.NAME),
                         r.get(TASK.DESCRIPTION),
+                        r.get(DIFFICULTY.ID),
                         r.get(DIFFICULTY.NAME),
                         r.get(DIFFICULTY.BASE_XP),
                         r.get(TASK.INTERVAL_DAYS),
@@ -97,6 +111,36 @@ public class TaskRepository {
                         r.get(ASSIGNED_TASK.DUE_DATE),
                         currentMemberId.equals(r.get(ASSIGNED_TASK.ASSIGNED_MEMBER_ID)),
                         r.get(completedByCurrentUser)
+                ));
+    }
+
+    public List<TaskListItemResponse> findTaskListItemsByHouseholdId(UUID householdId, boolean active) {
+        return dslContext
+                .select(
+                        TASK.ID,
+                        TASK.NAME,
+                        DIFFICULTY.NAME,
+                        DIFFICULTY.WEIGHT,
+                        TASK.INTERVAL_DAYS,
+                        ASSIGNED_TASK.DUE_DATE,
+                        USER.USER_NAME
+                ).from(TASK)
+                .join(DIFFICULTY).on(DIFFICULTY.ID.eq(TASK.DIFFICULTY_ID))
+                .leftJoin(ASSIGNED_TASK).on(ASSIGNED_TASK.TASK_ID.eq(TASK.ID))
+                .and(ASSIGNED_TASK.STATUS.eq(TaskStatus.OPEN.getStatus()))
+                .leftJoin(HOUSEHOLD_MEMBER).on(HOUSEHOLD_MEMBER.ID.eq(ASSIGNED_TASK.ASSIGNED_MEMBER_ID))
+                .leftJoin(USER).on(USER.ID.eq(HOUSEHOLD_MEMBER.USER_ID))
+                .where(TASK.HOUSEHOLD_ID.eq(householdId))
+                .and(TASK.ACTIVE.eq(active))
+                .orderBy(ASSIGNED_TASK.DUE_DATE.asc().nullsLast(), TASK.NAME.asc())
+                .fetch(r -> new TaskListItemResponse(
+                        r.get(TASK.ID),
+                        r.get(TASK.NAME),
+                        r.get(DIFFICULTY.NAME),
+                        r.get(DIFFICULTY.WEIGHT),
+                        r.get(TASK.INTERVAL_DAYS),
+                        r.get(ASSIGNED_TASK.DUE_DATE),
+                        r.get(USER.USER_NAME)
                 ));
     }
 }

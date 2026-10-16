@@ -1,0 +1,38 @@
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-checkbox {
+  margin-bottom: 1rem;
+}
+
+.due {
+  display: flex;
+  gap: 1rem;
+}
+
+.due mat-form-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.due mat-form-field,
+.hint,
+.error {
+  width: auto;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+}
+
+.error {
+  margin: 0;
+  color: var(--error);
+}

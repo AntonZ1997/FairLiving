@@ -117,11 +117,12 @@ public class AssignedTaskRepository {
                         r.get(openTaskCount)));
     }
 
-    public void complete(UUID assignedTaskId, Instant completedAt) {
+    public void complete(UUID assignedTaskId, Instant completedAt, int earnedXp) {
         dslContext
                 .update(ASSIGNED_TASK)
                 .set(ASSIGNED_TASK.STATUS, TaskStatus.COMPLETED.getStatus())
                 .set(ASSIGNED_TASK.COMPLETED_AT, completedAt)
+                .set(ASSIGNED_TASK.EARNED_XP, earnedXp)
                 .where(ASSIGNED_TASK.ID.eq(assignedTaskId))
                 .execute();
     }

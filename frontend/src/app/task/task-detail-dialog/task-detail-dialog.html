@@ -7,6 +7,11 @@
               [disabled]="busy()" (click)="pause()">
         <mat-icon>pause</mat-icon>
       </button>
+    } @else {
+      <button mat-icon-button type="button" aria-label="Aufgabe bearbeiten"
+              [disabled]="busy()" (click)="edit()">
+        <mat-icon>edit</mat-icon>
+      </button>
     }
 
     <h2 mat-dialog-title>{{ task.name }}</h2>

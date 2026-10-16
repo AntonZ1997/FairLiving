@@ -7,6 +7,7 @@ public record TaskDetailResponse(
         UUID taskId,
         String name,
         String description,
+        UUID difficultyId,
         String difficultyName,
         int xpReward,
         int intervalDays,

@@ -47,11 +47,16 @@ public class TaskService {
         return assignedTaskRepository.findOpenTasksByMemberId(householdMember.getId());
     }
 
+    public List<TaskListItemResponse> getTasks(UUID householdId, UUID userId, boolean active) {
+        householdService.requireMembership(householdId, userId);
+        return taskRepository.findTaskListItemsByHouseholdId(householdId, active);
+    }
+
     @Transactional
     public AssignedTaskResponse createTask(UUID householdId, UUID userId, CreateTaskRequest createTaskRequest) {
         householdService.requireMembership(householdId, userId);
 
-        if(!difficultyRepository.exists(createTaskRequest.difficultyId())) {
+        if (!difficultyRepository.exists(createTaskRequest.difficultyId())) {
             throw new DifficultyNotFoundException(createTaskRequest.difficultyId());
         }
 
@@ -78,14 +83,14 @@ public class TaskService {
         AssignedTaskRecord assignedTask = assignedTaskRepository.findRecordById(assignedTaskId)
                 .orElseThrow(() -> new AssignedTaskNotFoundException(assignedTaskId));
 
-        if(TaskStatus.COMPLETED.getStatus().equals(assignedTask.getStatus())) {
+        if (TaskStatus.COMPLETED.getStatus().equals(assignedTask.getStatus())) {
             throw new TaskAlreadyCompletedException(assignedTaskId);
         }
 
         HouseholdMemberRecord householdMember = householdMemberRepository.findById(assignedTask.getAssignedMemberId())
                 .orElseThrow(() -> new AssignedTaskNotFoundException(assignedTaskId));
 
-        if(!householdMember.getUserId().equals(userId)) {
+        if (!householdMember.getUserId().equals(userId)) {
             throw new TaskIsNotAssignedToUserException(assignedTaskId, userId);
         }
 
@@ -95,12 +100,12 @@ public class TaskService {
         Instant completedAt = Instant.now();
         boolean completedOnTime = !completedAt.isAfter(assignedTask.getDueDate());
 
-        assignedTaskRepository.complete(assignedTaskId, completedAt);
-
         int baseXp = difficultyRepository.findBaseXp(task.getDifficultyId());
         CompletionReward completionReward = gamificationService.calculateCompletionReward(householdMember, baseXp, completedOnTime);
 
-        if(task.getIntervalDays() > 0) {
+        assignedTaskRepository.complete(assignedTaskId, completedAt, completionReward.earnedExperiencePoints());
+
+        if (task.getIntervalDays() > 0) {
             Instant newDueDate = completedAt.plus(task.getIntervalDays(), ChronoUnit.DAYS);
             UUID nextAssignedHouseholdMemberId = taskDistributionService.determineHouseholdMemberForTask(householdMember.getHouseholdId());
             assignedTaskRepository.insert(task.getId(), nextAssignedHouseholdMemberId, newDueDate);
@@ -142,16 +147,34 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskDetailResponse activateTask(UUID taskId, UUID userId, Instant dueDate) {
+    public TaskDetailResponse updateTask(UUID taskId, UUID userId, UpdateTaskRequest updateTaskRequest) {
         TaskRecord task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException(taskId));
 
         HouseholdMemberRecord householdMember = householdService.requireMembership(task.getHouseholdId(), userId);
 
-        taskRepository.setActive(taskId, true);
+        if (task.getActive()) {
+            throw new TaskIsAlreadyActiveException(taskId);
+        }
 
-        UUID assignedMemberId = taskDistributionService.determineHouseholdMemberForTask(task.getHouseholdId());
-        assignedTaskRepository.insert(task.getId(), assignedMemberId, dueDate);
+        if (!difficultyRepository.exists(updateTaskRequest.difficultyId())) {
+            throw new DifficultyNotFoundException(updateTaskRequest.difficultyId());
+        }
+
+        taskRepository.update(
+                taskId,
+                updateTaskRequest.name(),
+                updateTaskRequest.description(),
+                updateTaskRequest.difficultyId(),
+                updateTaskRequest.intervalDays()
+        );
+
+        if (updateTaskRequest.dueDate() != null) {
+            taskRepository.setActive(taskId, true);
+            UUID assignedMemberId =
+                    taskDistributionService.determineHouseholdMemberForTask(task.getHouseholdId());
+            assignedTaskRepository.insert(task.getId(), assignedMemberId, updateTaskRequest.dueDate());
+        }
 
         return taskRepository.fetchTaskDetails(taskId, householdMember.getId()).orElseThrow();
     }

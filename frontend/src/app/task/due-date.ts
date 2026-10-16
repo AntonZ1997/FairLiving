@@ -1,6 +1,5 @@
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 
-
 export function isOverdue(dueDate: string): boolean {
   return new Date(dueDate).getTime() < Date.now();
 }
@@ -57,5 +56,18 @@ export function dueInFuture(group: AbstractControl): ValidationErrors | null {
     return null;
   }
 
+  return combineDateAndTime(date, time).getTime() > Date.now() ? null : { dueInPast: true };
+}
+
+export function dueRequiredWhenActivatingTask(group: AbstractControl): ValidationErrors | null {
+  if (!group.get('activate')?.value) {
+    return null;
+  }
+  const date = group.get('dueDate')?.value as Date | null;
+  const time = group.get('dueTime')?.value as Date | null;
+
+  if (!date || !time) {
+    return { dueMissing: true };
+  }
   return combineDateAndTime(date, time).getTime() > Date.now() ? null : { dueInPast: true };
 }

@@ -6,6 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { HouseholdService } from '../household-service';
 import { HouseholdMemberResponse, HouseholdResponse } from '../household.model';
@@ -19,6 +20,7 @@ import { firstValueFrom } from 'rxjs';
     DatePipe,
     RouterLink,
     MatTableModule,
+    MatSortModule,
     MatMenuModule,
     MatIconModule,
     MatButtonModule,
@@ -38,6 +40,7 @@ export class HouseholdMembers implements OnInit {
 
   protected readonly household = signal<HouseholdResponse | null>(null);
   protected readonly members = signal<HouseholdMemberResponse[]>([]);
+  protected readonly sort = signal<Sort>({ active: '', direction: '' });
   protected readonly loading = signal(true);
 
   protected readonly isAdmin = computed(
@@ -49,6 +52,8 @@ export class HouseholdMembers implements OnInit {
       ? ['userName', 'role', 'levelNumber', 'levelTitle', 'joined', 'actions']
       : ['userName', 'role', 'levelNumber', 'levelTitle', 'joined'],
   );
+
+  protected readonly visibleMembers = computed(() => this.sortMembers(this.members()));
 
   async ngOnInit(): Promise<void> {
     await this.reload();
@@ -97,6 +102,42 @@ export class HouseholdMembers implements OnInit {
 
   protected roleLabel(role: HouseholdMemberResponse['role']): string {
     return role === 'admin' ? 'Admin' : 'Mitglied';
+  }
+
+  private sortMembers(members: HouseholdMemberResponse[]): HouseholdMemberResponse[] {
+    const { active, direction } = this.sort();
+
+    if (!direction) {
+      return members;
+    }
+
+    const factor = direction === 'asc' ? 1 : -1;
+
+    return [...members].sort((left, right) => {
+      const leftValue = this.sortValue(left, active);
+      const rightValue = this.sortValue(right, active);
+
+      return typeof leftValue === 'number' && typeof rightValue === 'number'
+        ? factor * (leftValue - rightValue)
+        : factor * String(leftValue).localeCompare(String(rightValue), 'de');
+    });
+  }
+
+  private sortValue(member: HouseholdMemberResponse, column: string): string | number {
+    switch (column) {
+      case 'userName':
+        return member.userName;
+      case 'role':
+        return member.role === 'admin' ? 0 : 1;
+      case 'levelNumber':
+        return member.levelNumber;
+      case 'levelTitle':
+        return member.levelTitle;
+      case 'joined':
+        return new Date(member.joined).getTime();
+      default:
+        return '';
+    }
   }
 
   private async reload(): Promise<void> {
