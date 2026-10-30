@@ -1,0 +1,59 @@
+<div class="page-card">
+  @if (household(); as household) {
+    <header class="statistics-head">
+      <a mat-button [routerLink]="['/households', householdId()]">
+        <mat-icon>arrow_back</mat-icon>
+        Zum Dashboard
+      </a>
+
+      <h1>{{ household.name }} - Statistiken</h1>
+    </header>
+
+    <form class="parameters" [formGroup]="form">
+      <mat-form-field class="evaluation" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Auswertung</mat-label>
+        <mat-select formControlName="evaluation">
+          @for (entry of evaluations; track entry.value) {
+            <mat-option [value]="entry.value">{{ entry.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Von</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [max]="today" formControlName="from" />
+        <mat-datepicker-toggle matSuffix [for]="fromPicker" />
+        <mat-datepicker #fromPicker />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Bis</mat-label>
+        <input matInput [matDatepicker]="toPicker"
+               [min]="form.controls.from.value" [max]="today" formControlName="to" />
+        <mat-datepicker-toggle matSuffix [for]="toPicker" />
+        <mat-datepicker #toPicker />
+      </mat-form-field>
+    </form>
+
+    @if (form.hasError('rangeReversed')) {
+      <p class="error">Das Startdatum darf nicht nach dem Enddatum liegen.</p>
+    } @else if (form.hasError('endInFuture')) {
+      <p class="error">Das Enddatum darf nicht in der Zukunft liegen.</p>
+    }
+
+    <div class="visualization">
+      @if (loading()) {
+        <mat-spinner diameter="45" />
+      } @else if (!hasData()) {
+        <p class="empty">{{ emptyMessage() }}</p>
+      } @else {
+        <h2>{{ chartTitle() }}</h2>
+        <div class="chart-area">
+          <canvas #chartCanvas></canvas>
+        </div>
+      }
+    </div>
+  } @else {
+    <mat-spinner diameter="45" />
+  }
+</div>

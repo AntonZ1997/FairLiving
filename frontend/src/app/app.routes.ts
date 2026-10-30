@@ -50,6 +50,10 @@ export const routes: Routes = [
         path: 'households/:householdId/tasks',
         loadComponent: () => import('./task/task-list/task-list').then((m) => m.TaskList),
       },
+      {
+        path: 'households/:householdId/statistics',
+        loadComponent: () => import('./statistics/statistics/statistics').then((m) => m.Statistics),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

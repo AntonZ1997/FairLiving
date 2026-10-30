@@ -40,7 +40,7 @@
           <button mat-flat-button type="button" [routerLink]="['/households', householdId(), 'tasks']">Alle Aufgaben
             anzeigen
           </button>
-          <button mat-stroked-button type="button" disabled>Statistiken anzeigen</button>
+          <button mat-flat-button type="button" [routerLink]="['/households', householdId(), 'statistics']">Statistiken anzeigen</button>
         </div>
 
         @if (me(); as me) {

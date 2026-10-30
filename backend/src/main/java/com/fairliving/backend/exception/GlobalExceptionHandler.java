@@ -70,4 +70,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleForbidden(RuntimeException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
+
+    @ExceptionHandler(InvalidDateRangeException.class)
+    public ResponseEntity<String> handleInvalidDateRange(InvalidDateRangeException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
 }
