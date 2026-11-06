@@ -9,6 +9,10 @@ const NOTIFICATIONS_EVENT = 'notification';
 export class NotificationService {
   private readonly http = inject(HttpClient);
 
+  /**
+   * Stellt Server-Sent-Events-Verbindung her und liefert stets die ganze Liste der ungelesenen Benachrichtigungen.
+   * @param householdId ID des Haushalts
+   */
   streamNotifications(householdId: string): Observable<NotificationResponse[]> {
     return new Observable<NotificationResponse[]>((subscriber) => {
       const source = new EventSource(`/api/households/${householdId}/notifications/stream`);
@@ -18,7 +22,7 @@ export class NotificationService {
         subscriber.next(JSON.parse(data) as NotificationResponse[]);
       });
 
-      return () => source.close();
+      return () => source.close(); // Verbindung wird beim Verlassen des Dashboards geschlossen
     });
   }
 

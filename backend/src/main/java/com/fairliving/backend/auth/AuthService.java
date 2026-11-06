@@ -35,7 +35,7 @@ public class AuthService {
             throw new BadCredentialsException("Invalid email or password");
         }
         if(!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new BadCredentialsException("Invalid password");
+            throw new BadCredentialsException("Invalid email or password");
         }
         return user;
     }

@@ -87,6 +87,12 @@ public class AssignedTaskRepository {
                         r.get(USER.USER_NAME)));
     }
 
+    /**
+     * Berechnet für alle Mitglieder des Haushalts den Workload-Score seit {@code completedSince}
+     * @param householdId ID des Haushalts
+     * @param completedSince Zeitpunkt ab dem die Berechnung des Workloads erfolgen soll
+     * @return Liste mit den Workload-Scores der Haushaltsmitglieder
+     */
     public List<MemberWorkload> findWorkloads(UUID householdId, Instant completedSince) {
         Field<Double> statusFactor = DSL
                 .when(ASSIGNED_TASK.STATUS.eq(TaskStatus.OPEN.getStatus()),

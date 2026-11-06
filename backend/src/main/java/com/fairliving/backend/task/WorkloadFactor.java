@@ -1,5 +1,11 @@
 package com.fairliving.backend.task;
 
+/**
+ * Gewichtungsfaktor bei der Workloadberechnung.
+ * Pünktlich erledigte Aufgaben haben den Faktor 1.1.
+ * Verspätet erledigte Aufgaben haben den Faktor 0.9.
+ * Offene Aufgaben haben den Faktor 1.0.
+ */
 public enum WorkloadFactor {
 
     COMPLETED_ON_TIME(1.1),

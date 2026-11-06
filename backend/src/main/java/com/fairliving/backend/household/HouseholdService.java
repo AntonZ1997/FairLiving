@@ -107,6 +107,14 @@ public class HouseholdService {
         return membership;
     }
 
+    /**
+     * Entfernt ein Mitglied aus dem Haushalt, wenn der angemeldete Nutzer ein Admin ist und das zu entfernende
+     * Mitglied nicht man selbst ist. Dem zu löschenden Nutzer zugewiesene Aufgaben werden auf die verbleibenden
+     * Haushaltsmitglieder mittels des dynamischen Verteilungsalgorithmus verteilt.
+     * @param householdId ID des Haushalts
+     * @param memberId ID des zu löschenden Nutzers
+     * @param currentUserId ID des angemeldeten Nutzers
+     */
     @Transactional
     public void removeMember(UUID householdId, UUID memberId, UUID currentUserId) {
         HouseholdMemberRecord admin = requireAdmin(householdId, currentUserId);
@@ -127,6 +135,12 @@ public class HouseholdService {
         notificationService.notifyRemovedMember(householdId, removedHouseholdMemberName);
     }
 
+    /**
+     * Überträgt Adminrechte auf ein anderes Haushaltsmitglied. Der alte Admin wird ein normales Haushaltsmitglied.
+     * @param householdId ID des Haushalts
+     * @param newAdminMemberId ID des neuen Admins
+     * @param currentUserId ID des angemeldeten Nutzers
+     */
     @Transactional
     public void changeAdmin(UUID householdId, UUID newAdminMemberId, UUID currentUserId) {
         HouseholdMemberRecord admin = requireAdmin(householdId, currentUserId);
@@ -143,6 +157,14 @@ public class HouseholdService {
         notificationService.notifyNewAdmin(newAdminMemberId);
     }
 
+    /**
+     * Entfernt den angemeldeten Nutzer aus dem Haushalt. War er Admin des Haushalts, gehen die Adminrechte an das verbleibende
+     * Mitglied, welches nach ihm am längsten im Haushalt ist. Seine Aufgaben werden auf alle verbleibenden Haushaltsmitglieder
+     * mittels des dynamischen Verteilungsalgorithmus verteilt.
+     * Falls er das letzte Mitglied des Haushalts war, wird der Haushalt mitsamt aller Aufgaben gelöscht.
+     * @param householdId ID des Haushalts
+     * @param userId ID des angemeldeten Nutzers
+     */
     @Transactional
     public void leaveHousehold(UUID householdId, UUID userId) {
         HouseholdMemberRecord leavingMember = requireMembership(householdId, userId);

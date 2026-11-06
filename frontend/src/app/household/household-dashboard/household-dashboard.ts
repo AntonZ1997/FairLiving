@@ -126,7 +126,7 @@ export class HouseholdDashboard {
   }
 
   protected async openNotificationDialog(): Promise<void> {
-    const shown = this.notifications();
+    const shown = this.notifications(); // Angezeigte Benachrichtigungen werden als gelesen markiert
 
     const dialogRef = this.dialog.open<NotificationDialog, NotificationResponse[]>(
       NotificationDialog,

@@ -9,6 +9,11 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+/**
+ * Erstellt Fälligkeitsbenachrichtigungen um 7 Uhr morgens jedes Tages.
+ * Dabei gibt es eine Warnung für Aufgaben, die innerhalb der nächsten X Stunden {@code DUE_IN_X_HOURS_NOTIFICATION}
+ * (24 Stunden) fällig sind und einen Alarm für überfällige Aufgaben.
+ */
 @Component
 public class NotificationScheduler {
 

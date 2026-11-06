@@ -11,7 +11,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-
+/**
+ * Konfiguration der Session-basierten Authentifizierung. Der Sicherheitskontext liegt dabei nach dem Login in der
+ * HTTP-Session, wobei der Browser bei jeder Anfrage das Session-Cookie mitsendet.
+ */
 @Configuration
 public class SecurityConfig {
 

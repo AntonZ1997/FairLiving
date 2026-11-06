@@ -16,9 +16,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Versendet Benachrichtigungen an die Haushaltsmitglieder über Server-Sent Events (SSE)
+ */
 @Component
 public class NotificationSendingService {
 
+    // Timeout nach dem eine neue Verbindung hergestellt werden muss
     private static final long STREAM_TIMEOUT = Duration.ofMinutes(10).toMillis();
     private static final String NOTIFICATION_EVENT = "notification";
 
@@ -29,6 +33,11 @@ public class NotificationSendingService {
         this.notificationRepository = notificationRepository;
     }
 
+    /**
+     * Registriert neue Verbndungen und sendet anschließend aktuell ungelesene Benachrichtigungen an die Clients.
+     * @param householdMemberId ID des registrierenden Haushaltsmitglieds
+     * @param notifications ungelesene Benachrichtigungen
+     */
     public SseEmitter subscribe(UUID householdMemberId, List<NotificationResponse> notifications) {
         SseEmitter emitter = new SseEmitter(STREAM_TIMEOUT);
 
@@ -42,6 +51,9 @@ public class NotificationSendingService {
         return emitter;
     }
 
+    /**
+     * Schickt die vollständige Liste ungelesener Benachrichtigungen an alle betroffenen Haushaltsmitglieder.
+     */
     @TransactionalEventListener(fallbackExecution = true)
     public void onNotificationCreated(NotificationCreatedEvent event) {
         for (UUID householdMemberId : event.householdMemberIds()) {
@@ -58,6 +70,10 @@ public class NotificationSendingService {
         }
     }
 
+    /**
+     * Pingt alle 20 Sekunden, damit die Verbindung nicht wegen inaktivität geschlossen wird.
+     * Fehlerhafte Verbindungen werden entfernt.
+     */
     @Scheduled(fixedRate = 20000)
     public void pingHouseholdMembers() {
         emitters.forEach((householdMemberId, emitters) -> {

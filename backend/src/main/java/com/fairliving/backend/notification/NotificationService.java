@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Erstellt Benachrichtigungen für Ereignisse in einem Haushalt und markiert diese als gelesen
+ */
 @Service
 public class NotificationService {
 
@@ -86,6 +89,12 @@ public class NotificationService {
                 "Du bist jetzt Admin des Haushalts.");
     }
 
+    /**
+     * Speichert Benachrichtigung für alle Empfänger und initiiert eine Versendung an die Haushaltsmitglieder.
+     * @param householdMemberIds Liste der IDs der Haushaltsmitglieder
+     * @param type Benachrichtigungs-Typ
+     * @param message Benachrichtigung
+     */
     private void send(List<UUID> householdMemberIds, NotificationType type, String message) {
         if (householdMemberIds.isEmpty()) {
             return;
