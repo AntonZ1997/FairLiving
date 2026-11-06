@@ -1,0 +1,21 @@
+form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 500px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+button[mat-flat-button] {
+  min-height: 3rem;
+  margin-top: 0.5rem;
+  border-radius: 10px;
+}
+
+.page h1 {
+  margin-bottom: 3.5rem;
+}
+

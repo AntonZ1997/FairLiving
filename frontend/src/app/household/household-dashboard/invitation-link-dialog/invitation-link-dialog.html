@@ -1,0 +1,27 @@
+<h2 mat-dialog-title>Mitglied hinzufügen</h2>
+
+<mat-dialog-content>
+  <p>Teile diesen Link, um jemanden in den Haushalt einzuladen:</p>
+
+  <div class="link-row">
+    <mat-form-field appearance="outline">
+      <mat-label>Einladungslink</mat-label>
+      <input
+        #linkInput
+        matInput
+        type="text"
+        [value]="invitationLink"
+        readonly
+        (focus)="linkInput.select()"
+      />
+    </mat-form-field>
+
+    <button mat-icon-button type="button" aria-label="Link kopieren" (click)="copy()">
+      <mat-icon>content_copy</mat-icon>
+    </button>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Schließen</button>
+</mat-dialog-actions>

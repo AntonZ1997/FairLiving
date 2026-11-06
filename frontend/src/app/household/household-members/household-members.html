@@ -1,0 +1,89 @@
+<div class="page-card">
+  @if (loading()) {
+    <mat-spinner diameter="40" />
+  } @else if (household(); as household) {
+    <header class="members-head">
+      <a mat-button [routerLink]="['/households', householdId()]">
+        <mat-icon>arrow_back</mat-icon>
+        Zum Dashboard
+      </a>
+
+      <h1>{{ household.name }} - Mitglieder</h1>
+
+      <button mat-flat-button type="button" (click)="openInvitationDialog()">
+        Mitglied hinzufügen
+      </button>
+    </header>
+
+    <div class="scroll-area">
+      <table mat-table [dataSource]="visibleMembers()" matSort (matSortChange)="sort.set($event)">
+        <ng-container matColumnDef="userName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let member">
+            {{ member.userName }}@if (member.isCurrentUser) {
+            <span class="you">(Du)</span>
+          }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Rolle</th>
+          <td mat-cell *matCellDef="let member">{{ roleLabel(member.role) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="levelNumber">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Level</th>
+          <td mat-cell *matCellDef="let member">{{ member.levelNumber }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="levelTitle">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Titel</th>
+          <td mat-cell *matCellDef="let member">{{ member.levelTitle }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="joined">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Beigetreten am</th>
+          <td mat-cell *matCellDef="let member">{{ member.joined | date: 'dd.MM.yyyy' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let member">
+            @if (member.isCurrentUser) {
+              <button mat-icon-button type="button" aria-label="Optionen"
+                      [matMenuTriggerFor]="ownMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+
+              <mat-menu #ownMenu="matMenu">
+                <button mat-menu-item type="button" class="leave" (click)="leaveHousehold()">
+                  <mat-icon>logout</mat-icon>
+                  <span>Haushalt verlassen</span>
+                </button>
+              </mat-menu>
+            } @else if (isAdmin()) {
+              <button mat-icon-button type="button" aria-label="Optionen"
+                      [matMenuTriggerFor]="memberMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+
+              <mat-menu #memberMenu="matMenu">
+                <button mat-menu-item type="button" (click)="transferAdminRole(member)">
+                  <mat-icon>admin_panel_settings</mat-icon>
+                  <span>Zum Admin ernennen</span>
+                </button>
+                <button mat-menu-item type="button" (click)="removeMember(member)">
+                  <mat-icon>person_remove</mat-icon>
+                  <span>Mitglied entfernen</span>
+                </button>
+              </mat-menu>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+  }
+</div>

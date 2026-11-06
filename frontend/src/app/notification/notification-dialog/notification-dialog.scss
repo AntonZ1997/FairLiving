@@ -1,0 +1,87 @@
+.dialog-header {
+  display: grid;
+  grid-template-columns: 3rem 1fr 3rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.dialog-header h2 {
+  grid-column: 2;
+  margin: 0;
+  padding: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.dialog-header h2::before {
+  display: none;
+}
+
+.dialog-header button {
+  grid-column: 3;
+}
+
+mat-dialog-content {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.notifications {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notifications li {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.symbol {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px solid;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.notifications li.info .symbol {
+  color: #1565c0;
+}
+
+.notifications li.warning .symbol {
+  color: #ef6c00;
+}
+
+.notifications li.alert .symbol {
+  color: #c62828;
+}
+
+.message {
+  margin: 0;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.empty {
+  margin: 0;
+  color: var(--muted);
+  text-align: center;
+}

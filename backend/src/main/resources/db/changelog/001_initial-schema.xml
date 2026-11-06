@@ -32,7 +32,7 @@
             <column name="name" type="text">
                 <constraints nullable="false" />
             </column>
-            <column name="invitation_link" type="text">
+            <column name="invitation_id" type="text">
                 <constraints unique="true" nullable="false" />
             </column>
             <column name="created_at" type="timestamp">
@@ -65,10 +65,10 @@
                 <constraints primaryKey="true" />
             </column>
             <column name="household_id" type="uuid">
-                <constraints nullable="false" foreignKeyName="fk_household_member_household" referencedTableName="household" referencedColumnNames="id"/>
+                <constraints nullable="false" foreignKeyName="fk_household_member_household" referencedTableName="household" referencedColumnNames="id" deleteCascade="true"/>
             </column>
             <column name="user_id" type="uuid">
-                <constraints nullable="false" foreignKeyName="fk_household_member_user" referencedTableName="user" referencedColumnNames="id"/>
+                <constraints nullable="false" foreignKeyName="fk_household_member_user" deleteCascade="true" referencedTableName="user" referencedColumnNames="id"/>
             </column>
             <column name="role" type="text">
                 <constraints nullable="false"/>
@@ -105,7 +105,7 @@
                 <constraints primaryKey="true" />
             </column>
             <column name="household_member_id" type="uuid">
-                <constraints nullable="false" foreignKeyName="fk_notification_household_member" referencedTableName="household_member" referencedColumnNames="id" />
+                <constraints nullable="false" foreignKeyName="fk_notification_household_member" referencedTableName="household_member" referencedColumnNames="id" deleteCascade="true"/>
             </column>
             <column name="type" type="text" >
                 <constraints nullable="false" />
@@ -135,13 +135,16 @@
             <column name="base_xp" type="int" >
                 <constraints nullable="false" />
             </column>
+            <column name="weight" type="int">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
         <createTable tableName="task">
             <column name="id" type="uuid">
                 <constraints primaryKey="true" />
             </column>
             <column name="household_id" type="uuid">
-                <constraints nullable="false" foreignKeyName="fk_task_household" referencedTableName="household" referencedColumnNames="id"/>
+                <constraints nullable="false" foreignKeyName="fk_task_household" referencedTableName="household" referencedColumnNames="id" deleteCascade="true"/>
             </column>
             <column name="name" type="text">
                 <constraints nullable="false" />
@@ -170,7 +173,7 @@
                 <constraints nullable="false" foreignKeyName="fk_assigned_task_task" referencedTableName="task" referencedColumnNames="id" />
             </column>
             <column name="assigned_member_id" type="uuid">
-                <constraints nullable="false" foreignKeyName="fk_assigned_task_household_member" referencedTableName="household_member" referencedColumnNames="id" />
+                <constraints nullable="false" foreignKeyName="fk_assigned_task_household_member" referencedTableName="household_member" referencedColumnNames="id" deleteCascade="true"/>
             </column>
             <column name="due_date" type="timestamp">
                 <constraints nullable="false" />

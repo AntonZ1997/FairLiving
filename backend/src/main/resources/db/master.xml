@@ -7,5 +7,5 @@
 
     <include file="db/changelog/001_initial-schema.xml"/>
     <include file="db/changelog/002_initial-data.xml"/>
-
+    <include file="db/changelog/003_assigned_task_earned_xp.xml" />
 </databaseChangeLog>
