@@ -25,7 +25,7 @@ public class HouseholdMemberRepository {
         this.dslContext = dslContext;
     }
 
-    public void insert(UUID householdId, UUID userId, HouseholdRole role, UUID levelId, int experiencePoints) {
+    public UUID insert(UUID householdId, UUID userId, HouseholdRole role, UUID levelId, int experiencePoints) {
         HouseholdMemberRecord householdMember = dslContext.newRecord(HOUSEHOLD_MEMBER);
         householdMember.setId(UUID.randomUUID());
         householdMember.setHouseholdId(householdId);
@@ -36,6 +36,7 @@ public class HouseholdMemberRepository {
         householdMember.setLevelId(levelId);
         householdMember.setJoined(Instant.now());
         householdMember.store();
+        return householdMember.getId();
     }
 
     public boolean exists(UUID householdId, UUID userId) {
@@ -123,11 +124,47 @@ public class HouseholdMemberRepository {
                 );
     }
 
+    public List<UUID> findHouseholdMemberIdsByHouseholdId(UUID householdId) {
+        return dslContext
+                .select(HOUSEHOLD_MEMBER.ID)
+                .from(HOUSEHOLD_MEMBER)
+                .where(HOUSEHOLD_MEMBER.HOUSEHOLD_ID.eq(householdId))
+                .fetch(r -> r.get(HOUSEHOLD_MEMBER.ID));
+    }
+
+    public Optional<String> findUserNameByMemberId(UUID householdMemberId) {
+        return dslContext
+                .select(USER.USER_NAME)
+                .from(HOUSEHOLD_MEMBER)
+                .join(USER).on(USER.ID.eq(HOUSEHOLD_MEMBER.USER_ID))
+                .where(HOUSEHOLD_MEMBER.ID.eq(householdMemberId))
+                .fetchOptional(r -> r.get(USER.USER_NAME));
+    }
+
     public void delete(UUID memberId) {
         dslContext
                 .deleteFrom(HOUSEHOLD_MEMBER)
                 .where(HOUSEHOLD_MEMBER.ID.eq(memberId))
                 .execute();
+    }
+
+    public void updateRole(UUID memberId, HouseholdRole role) {
+        dslContext
+                .update(HOUSEHOLD_MEMBER)
+                .set(HOUSEHOLD_MEMBER.ROLE, role.getRole())
+                .where(HOUSEHOLD_MEMBER.ID.eq(memberId))
+                .execute();
+    }
+
+    public Optional<UUID> findOldestMember(UUID householdId, UUID exceptionMemberId) {
+        return dslContext
+                .select(HOUSEHOLD_MEMBER.ID)
+                .from(HOUSEHOLD_MEMBER)
+                .where(HOUSEHOLD_MEMBER.HOUSEHOLD_ID.eq(householdId))
+                .and(HOUSEHOLD_MEMBER.ID.ne(exceptionMemberId))
+                .orderBy(HOUSEHOLD_MEMBER.JOINED.asc())
+                .limit(1)
+                .fetchOptional(r -> r.get(HOUSEHOLD_MEMBER.ID));
     }
 
 }

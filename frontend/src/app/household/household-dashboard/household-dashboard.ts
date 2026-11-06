@@ -1,4 +1,5 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HouseholdService } from '../household-service';
 import { SnackbarService } from '../../snackbar/snackbar-service';
 import { Router, RouterLink } from '@angular/router';
@@ -7,6 +8,7 @@ import { clearLastHouseholdId, setLastHouseholdId } from '../household-selection
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatButton, MatFabButton } from '@angular/material/button';
+import { MatBadge } from '@angular/material/badge';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
@@ -17,6 +19,9 @@ import { firstValueFrom } from 'rxjs';
 import { TaskService } from '../../task/task-service';
 import { dueLabel, isOverdue } from '../../task/due-date';
 import { TaskDetailDialog } from '../../task/task-detail-dialog/task-detail-dialog';
+import { NotificationService } from '../../notification/notification-service';
+import { NotificationResponse } from '../../notification/notification.model';
+import { NotificationDialog } from '../../notification/notification-dialog/notification-dialog';
 
 @Component({
   imports: [
@@ -27,6 +32,7 @@ import { TaskDetailDialog } from '../../task/task-detail-dialog/task-detail-dial
     MatProgressBar,
     MatIcon,
     MatFabButton,
+    MatBadge,
     RouterLink,
   ],
   selector: 'app-household-dashboard',
@@ -41,12 +47,16 @@ export class HouseholdDashboard {
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly taskService = inject(TaskService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly household = signal<HouseholdResponse | null>(null);
   protected readonly members = signal<HouseholdMemberResponse[]>([]);
   protected readonly openTasks = signal<AssignedTaskResponse[]>([]);
+  protected readonly notifications = signal<NotificationResponse[]>([]);
   protected readonly loading = signal(true);
   protected readonly topMembers = computed(() => this.members().slice(0, 3));
+  protected readonly newNotificationCount = computed(() => this.notifications().length);
   protected readonly isOverdue = isOverdue;
   protected readonly dueLabel = dueLabel;
   protected readonly me = computed(
@@ -88,6 +98,11 @@ export class HouseholdDashboard {
       this.members.set(members);
       this.openTasks.set(openTasks);
       setLastHouseholdId(this.householdId());
+
+      this.notificationService
+        .streamNotifications(this.householdId())
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((notifications) => this.notifications.set(notifications));
     } catch {
       clearLastHouseholdId();
       this.snackbar.error('Dieser Haushalt existiert nicht oder du bist kein Mitglied.');
@@ -108,6 +123,31 @@ export class HouseholdDashboard {
       data: `${window.location.origin}/join/${household.invitationId}`,
       width: '600px',
     });
+  }
+
+  protected async openNotificationDialog(): Promise<void> {
+    const shown = this.notifications();
+
+    const dialogRef = this.dialog.open<NotificationDialog, NotificationResponse[]>(
+      NotificationDialog,
+      { data: shown, width: '560px' },
+    );
+
+    if (shown.length > 0) {
+      const shownIds = shown.map((notification) => notification.notificationId);
+
+      this.notifications.update((current) =>
+        current.filter((notification) => !shownIds.includes(notification.notificationId)),
+      );
+
+      try {
+        await this.notificationService.readNotifications(this.householdId(), shownIds);
+      } catch {
+        this.snackbar.error('Benachrichtigungen konnten nicht als gelesen markiert werden.');
+      }
+    }
+
+    await firstValueFrom(dialogRef.afterClosed());
   }
 
   protected async openCreateTaskDialog(): Promise<void> {

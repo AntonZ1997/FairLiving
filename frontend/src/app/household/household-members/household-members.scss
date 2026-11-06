@@ -45,3 +45,8 @@ tr.mat-mdc-row:hover {
   margin-left: 0.5rem;
   color: var(--muted);
 }
+
+.leave {
+  --mat-menu-item-label-text-color: var(--error);
+  --mat-menu-item-icon-color: var(--error);
+}

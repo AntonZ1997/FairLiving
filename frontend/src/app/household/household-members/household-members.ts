@@ -10,6 +10,7 @@ import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { HouseholdService } from '../household-service';
 import { HouseholdMemberResponse, HouseholdResponse } from '../household.model';
+import { clearLastHouseholdId } from '../household-selection-service';
 import { InvitationLinkDialog } from '../household-dashboard/invitation-link-dialog/invitation-link-dialog';
 import { SnackbarService } from '../../snackbar/snackbar-service';
 import { ConfirmDialog, ConfirmDialogData } from '../../misc/confirm-dialog/confirm-dialog';
@@ -47,11 +48,7 @@ export class HouseholdMembers implements OnInit {
     () => this.members().find((member) => member.isCurrentUser)?.role === 'admin',
   );
 
-  protected readonly displayedColumns = computed(() =>
-    this.isAdmin()
-      ? ['userName', 'role', 'levelNumber', 'levelTitle', 'joined', 'actions']
-      : ['userName', 'role', 'levelNumber', 'levelTitle', 'joined'],
-  );
+  protected readonly displayedColumns =  ['userName', 'role', 'levelNumber', 'levelTitle', 'joined', 'actions'];
 
   protected readonly visibleMembers = computed(() => this.sortMembers(this.members()));
 
@@ -100,8 +97,93 @@ export class HouseholdMembers implements OnInit {
     }
   }
 
+  protected async transferAdminRole(member: HouseholdMemberResponse): Promise<void> {
+    const dialogRef = this.dialog.open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
+      data: {
+        title: 'Neuen Admin wählen',
+        message: `Du überträgst deine Adminrechte auf ${member.userName}`,
+        confirmLabel: 'Übertragen',
+      },
+      width: '420px',
+    });
+
+    const confirmed = await firstValueFrom(dialogRef.afterClosed());
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await this.householdService.transferAdminRole(this.householdId(), member.memberId);
+      this.snackbar.success(`${member.userName} ist jetzt der Admin des Haushalts.`);
+      await this.reload();
+    } catch {
+      this.snackbar.error('Adminrechte konnten nicht übertragen werden.');
+    }
+  }
+
+  protected async leaveHousehold(): Promise<void> {
+    const household = this.household();
+    const me = this.members().find((member) => member.isCurrentUser);
+
+    if (!household || !me) {
+      return;
+    }
+
+    const newAdmin: HouseholdMemberResponse | undefined = this.members()
+      .filter((member) => !member.isCurrentUser)
+      .sort((left, right) => new Date(left.joined).getTime() - new Date(right.joined).getTime())[0];
+
+    const dialogRef = this.dialog.open<ConfirmDialog, ConfirmDialogData, boolean>(ConfirmDialog, {
+      data: {
+        title: 'Haushalt verlassen',
+        message: this.leaveMessage(household.name, me.role === 'admin', newAdmin),
+        confirmLabel: newAdmin ? 'Verlassen' : 'Verlassen und löschen',
+        delete: true,
+      },
+      width: '440px',
+    });
+
+    const confirmed = await firstValueFrom(dialogRef.afterClosed());
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await this.householdService.leave(this.householdId());
+      clearLastHouseholdId();
+      this.snackbar.success(
+        newAdmin ? `Du hast ${household.name} verlassen.` : `${household.name} wurde gelöscht.`,
+      );
+      await this.router.navigate(['/households']);
+    } catch {
+      this.snackbar.error('Haushalt konnte nicht verlassen werden.');
+    }
+  }
+
   protected roleLabel(role: HouseholdMemberResponse['role']): string {
     return role === 'admin' ? 'Admin' : 'Mitglied';
+  }
+
+  private leaveMessage(
+    householdName: string,
+    isAdmin: boolean,
+    newAdmin: HouseholdMemberResponse | undefined,
+  ): string {
+    if (!newAdmin) {
+      return (
+        `Du bist das letzte Mitglied von ${householdName}. ` +
+        'Der Haushalt wird mit allen Aufgaben gelöscht.'
+      );
+    }
+
+    const redistribution =
+      'Deine offenen Aufgaben werden automatisch auf die übrigen Mitglieder verteilt.';
+
+    return isAdmin
+      ? `${redistribution} Die Adminrechte gehen an ${newAdmin.userName}.`
+      : redistribution;
   }
 
   private sortMembers(members: HouseholdMemberResponse[]): HouseholdMemberResponse[] {

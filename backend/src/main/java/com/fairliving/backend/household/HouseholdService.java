@@ -3,6 +3,7 @@ package com.fairliving.backend.household;
 import com.fairliving.backend.exception.*;
 import com.fairliving.backend.gamification.GamificationService;
 import com.fairliving.backend.household.dto.*;
+import com.fairliving.backend.notification.NotificationService;
 import com.fairliving.backend.task.AssignedTaskRepository;
 import com.fairliving.backend.task.TaskDistributionService;
 import de.fairliving.backend.jooq.tables.records.HouseholdMemberRecord;
@@ -13,6 +14,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,13 +27,15 @@ public class HouseholdService {
     private final GamificationService gamificationService;
     private final AssignedTaskRepository assignedTaskRepository;
     private final TaskDistributionService taskDistributionService;
+    private final NotificationService notificationService;
 
-    public HouseholdService(HouseholdRepository householdRepository, HouseholdMemberRepository householdMemberRepository, GamificationService gamificationService, AssignedTaskRepository assignedTaskRepository, TaskDistributionService taskDistributionService) {
+    public HouseholdService(HouseholdRepository householdRepository, HouseholdMemberRepository householdMemberRepository, GamificationService gamificationService, AssignedTaskRepository assignedTaskRepository, TaskDistributionService taskDistributionService, NotificationService notificationService) {
         this.householdRepository = householdRepository;
         this.householdMemberRepository = householdMemberRepository;
         this.gamificationService = gamificationService;
         this.assignedTaskRepository = assignedTaskRepository;
         this.taskDistributionService = taskDistributionService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -42,6 +46,7 @@ public class HouseholdService {
         return HouseholdResponse.from(household);
     }
 
+    @Transactional
     public HouseholdResponse joinHousehold(JoinHouseholdRequest joinHouseholdRequest, UUID userId) {
         HouseholdRecord household = householdRepository.findByInvitationId(joinHouseholdRequest.invitationId())
                 .orElseThrow(InvalidInvitationIdException::new);
@@ -51,7 +56,8 @@ public class HouseholdService {
         }
 
         try {
-            addMember(household.getId(), userId, HouseholdRole.MEMBER);
+            UUID newHouseholdMemberId = addMember(household.getId(), userId, HouseholdRole.MEMBER);
+            notificationService.notifyNewHouseholdMember(household.getId(), newHouseholdMemberId);
         } catch (DuplicateKeyException e) {
             throw new UserIsAlreadyHouseholdMemberException(household.getId(), userId);
         }
@@ -95,7 +101,7 @@ public class HouseholdService {
 
     public HouseholdMemberRecord requireAdmin(UUID householdId, UUID userId) {
         HouseholdMemberRecord membership = requireMembership(householdId, userId);
-        if (!HouseholdRole.fromString(membership.getRole()).equals(HouseholdRole.ADMIN)) {
+        if (!isAdmin(membership)) {
             throw new UserIsNotHouseholdAdminException(householdId, userId);
         }
         return membership;
@@ -103,29 +109,88 @@ public class HouseholdService {
 
     @Transactional
     public void removeMember(UUID householdId, UUID memberId, UUID currentUserId) {
-        HouseholdMemberRecord admin = requireMembership(householdId, currentUserId);
+        HouseholdMemberRecord admin = requireAdmin(householdId, currentUserId);
 
         if (admin.getId().equals(memberId)) {
             throw new CannotRemoveSelfException(memberId);
         }
 
+        requireMemberOfHousehold(householdId, memberId);
+
+        String removedHouseholdMemberName = householdMemberRepository.findUserNameByMemberId(memberId)
+                .orElse("Ein Mitglied");
+
+        redistributeOpenTasks(householdId, memberId);
+
+        householdMemberRepository.delete(memberId);
+
+        notificationService.notifyRemovedMember(householdId, removedHouseholdMemberName);
+    }
+
+    @Transactional
+    public void changeAdmin(UUID householdId, UUID newAdminMemberId, UUID currentUserId) {
+        HouseholdMemberRecord admin = requireAdmin(householdId, currentUserId);
+
+        if (admin.getId().equals(newAdminMemberId)) {
+            return;
+        }
+
+        requireMemberOfHousehold(householdId, newAdminMemberId);
+
+        householdMemberRepository.updateRole(newAdminMemberId, HouseholdRole.ADMIN);
+        householdMemberRepository.updateRole(admin.getId(), HouseholdRole.MEMBER);
+
+        notificationService.notifyNewAdmin(newAdminMemberId);
+    }
+
+    @Transactional
+    public void leaveHousehold(UUID householdId, UUID userId) {
+        HouseholdMemberRecord leavingMember = requireMembership(householdId, userId);
+
+        Optional<UUID> successorMemberId =
+                householdMemberRepository.findOldestMember(householdId, leavingMember.getId());
+
+        if (successorMemberId.isEmpty()) {
+            householdMemberRepository.delete(leavingMember.getId());
+            householdRepository.delete(householdId);
+            return;
+        }
+
+        if (isAdmin(leavingMember)) {
+            householdMemberRepository.updateRole(successorMemberId.get(), HouseholdRole.ADMIN);
+            notificationService.notifyNewAdmin(successorMemberId.get());
+        }
+
+        String leavingHouseholdMemberName = householdMemberRepository.findUserNameByMemberId(leavingMember.getId())
+                .orElse("Ein Mitglied");
+
+        redistributeOpenTasks(householdId, leavingMember.getId());
+
+        householdMemberRepository.delete(leavingMember.getId());
+
+        notificationService.notifyRemovedMember(householdId, leavingHouseholdMemberName);
+    }
+
+    private void redistributeOpenTasks(UUID householdId, UUID householdMemberId) {
+        for (UUID assignedTaskId : assignedTaskRepository.findOpenAssignedTaskIdsByMemberId(householdMemberId)) {
+            UUID otherHouseholdMember = taskDistributionService.determineHouseholdMemberForTask(householdId, householdMemberId);
+            assignedTaskRepository.reassign(assignedTaskId, otherHouseholdMember);
+        }
+    }
+
+    private void requireMemberOfHousehold(UUID householdId, UUID memberId) {
         householdMemberRepository.findById(memberId)
                 .filter(member -> member.getHouseholdId().equals(householdId))
                 .orElseThrow(() -> new UserIsNotAHouseholdMemberException(householdId, memberId));
-
-        for (UUID assignedTaskId : assignedTaskRepository.findOpenAssignedTaskIdsByMemberId(memberId)) {
-            UUID otherHouseholdMember = taskDistributionService.determineHouseholdMemberForTask(householdId, memberId);
-            assignedTaskRepository.reassign(assignedTaskId, otherHouseholdMember);
-        }
-
-        householdMemberRepository.delete(memberId);
     }
 
+    private boolean isAdmin(HouseholdMemberRecord householdMember) {
+        return HouseholdRole.fromString(householdMember.getRole()).equals(HouseholdRole.ADMIN);
+    }
 
-    private void addMember(UUID householdId, UUID userId, HouseholdRole householdRole) {
+    private UUID addMember(UUID householdId, UUID userId, HouseholdRole householdRole) {
         LevelRecord startLevel = gamificationService.resolveLevel(INITIAL_EXPERIENCE_POINTS);
-        householdMemberRepository.insert(householdId, userId, householdRole, startLevel.getId(), INITIAL_EXPERIENCE_POINTS);
-
+        return householdMemberRepository.insert(householdId, userId, householdRole, startLevel.getId(), INITIAL_EXPERIENCE_POINTS);
     }
 
     private String generateInvitationId() {

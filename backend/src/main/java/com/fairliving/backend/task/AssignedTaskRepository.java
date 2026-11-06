@@ -1,5 +1,6 @@
 package com.fairliving.backend.task;
 
+import com.fairliving.backend.notification.dto.TaskDueNotice;
 import com.fairliving.backend.task.dto.AssignedTaskResponse;
 import com.fairliving.backend.task.dto.MemberWorkload;
 import de.fairliving.backend.jooq.tables.records.AssignedTaskRecord;
@@ -143,6 +144,24 @@ public class AssignedTaskRepository {
                 .and(ASSIGNED_TASK.STATUS.eq(TaskStatus.OPEN.getStatus()))
                 .fetch(r -> r.get(ASSIGNED_TASK.ID));
 
+    }
+
+    public List<TaskDueNotice> findOpenTasksDueBefore(Instant time) {
+        return dslContext
+                .select(
+                        ASSIGNED_TASK.ASSIGNED_MEMBER_ID,
+                        TASK.NAME,
+                        ASSIGNED_TASK.DUE_DATE
+                )
+                .from(ASSIGNED_TASK)
+                .join(TASK).on(TASK.ID.eq(ASSIGNED_TASK.TASK_ID))
+                .where(ASSIGNED_TASK.STATUS.eq(TaskStatus.OPEN.getStatus()))
+                .and(ASSIGNED_TASK.DUE_DATE.lt(time))
+                .fetch(r -> new TaskDueNotice(
+                        r.get(ASSIGNED_TASK.ASSIGNED_MEMBER_ID),
+                        r.get(TASK.NAME),
+                        r.get(ASSIGNED_TASK.DUE_DATE)
+                ));
     }
 
     public void reassign(UUID assignedTaskId, UUID newMemberId) {

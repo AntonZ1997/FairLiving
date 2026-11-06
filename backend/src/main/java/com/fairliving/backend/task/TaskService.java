@@ -5,6 +5,7 @@ import com.fairliving.backend.gamification.GamificationService;
 import com.fairliving.backend.gamification.dto.CompletionReward;
 import com.fairliving.backend.household.HouseholdMemberRepository;
 import com.fairliving.backend.household.HouseholdService;
+import com.fairliving.backend.notification.NotificationService;
 import com.fairliving.backend.task.dto.*;
 import de.fairliving.backend.jooq.tables.records.AssignedTaskRecord;
 import de.fairliving.backend.jooq.tables.records.HouseholdMemberRecord;
@@ -27,8 +28,9 @@ public class TaskService {
     private final HouseholdService householdService;
     private final HouseholdMemberRepository householdMemberRepository;
     private final GamificationService gamificationService;
+    private final NotificationService notificationService;
 
-    public TaskService(TaskRepository taskRepository, AssignedTaskRepository assignedTaskRepository, DifficultyRepository difficultyRepository, TaskDistributionService taskDistributionService, HouseholdService householdService, HouseholdMemberRepository householdMemberRepository, GamificationService gamificationService) {
+    public TaskService(TaskRepository taskRepository, AssignedTaskRepository assignedTaskRepository, DifficultyRepository difficultyRepository, TaskDistributionService taskDistributionService, HouseholdService householdService, HouseholdMemberRepository householdMemberRepository, GamificationService gamificationService, NotificationService notificationService) {
         this.taskRepository = taskRepository;
         this.assignedTaskRepository = assignedTaskRepository;
         this.difficultyRepository = difficultyRepository;
@@ -36,6 +38,7 @@ public class TaskService {
         this.householdService = householdService;
         this.householdMemberRepository = householdMemberRepository;
         this.gamificationService = gamificationService;
+        this.notificationService = notificationService;
     }
 
     public List<DifficultyResponse> getDifficulties() {
@@ -75,6 +78,8 @@ public class TaskService {
                 createTaskRequest.dueDate()
         );
 
+        notificationService.notifyAssignedTask(householdMemberId, task.getName());
+
         return assignedTaskRepository.findById(assignedTask.getId()).orElseThrow();
     }
 
@@ -105,10 +110,20 @@ public class TaskService {
 
         assignedTaskRepository.complete(assignedTaskId, completedAt, completionReward.earnedExperiencePoints());
 
+        if (completionReward.leveledUp()) {
+            notificationService.notifyNewLevel(
+                    householdMember.getHouseholdId(),
+                    householdMember.getId(),
+                    completionReward.level().getLevelNumber(),
+                    completionReward.level().getTitle()
+            );
+        }
+
         if (task.getIntervalDays() > 0) {
             Instant newDueDate = completedAt.plus(task.getIntervalDays(), ChronoUnit.DAYS);
             UUID nextAssignedHouseholdMemberId = taskDistributionService.determineHouseholdMemberForTask(householdMember.getHouseholdId());
             assignedTaskRepository.insert(task.getId(), nextAssignedHouseholdMemberId, newDueDate);
+            notificationService.notifyAssignedTask(nextAssignedHouseholdMemberId, task.getName());
         }
 
         return new TaskCompletionResponse(
@@ -174,6 +189,7 @@ public class TaskService {
             UUID assignedMemberId =
                     taskDistributionService.determineHouseholdMemberForTask(task.getHouseholdId());
             assignedTaskRepository.insert(task.getId(), assignedMemberId, updateTaskRequest.dueDate());
+            notificationService.notifyAssignedTask(assignedMemberId, task.getName());
         }
 
         return taskRepository.fetchTaskDetails(taskId, householdMember.getId()).orElseThrow();

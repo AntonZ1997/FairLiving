@@ -37,10 +37,12 @@
         </mat-card>
 
         <div class="actions">
-          <button mat-flat-button type="button" [routerLink]="['/households', householdId(), 'tasks']">Alle Aufgaben
-            anzeigen
+          <button mat-flat-button type="button" [routerLink]="['/households', householdId(), 'tasks']">
+            Alle Aufgaben anzeigen
           </button>
-          <button mat-flat-button type="button" [routerLink]="['/households', householdId(), 'statistics']">Statistiken anzeigen</button>
+          <button mat-flat-button type="button" [routerLink]="['/households', householdId(), 'statistics']">
+            Statistiken anzeigen
+          </button>
         </div>
 
         @if (me(); as me) {
@@ -88,5 +90,11 @@
         </div>
       }
     </div>
+
+    <button mat-fab class="notifications" type="button" aria-label="Benachrichtigungen"
+            [matBadge]="newNotificationCount()" [matBadgeHidden]="newNotificationCount() === 0"
+            (click)="openNotificationDialog()">
+      <span class="symbol">i</span>
+    </button>
   </div>
 }

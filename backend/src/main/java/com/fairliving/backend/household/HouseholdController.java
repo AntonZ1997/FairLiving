@@ -59,6 +59,20 @@ public class HouseholdController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{householdId}/members/{memberId}/admin")
+    public ResponseEntity<Void> changeAdmin(@PathVariable UUID householdId, @PathVariable UUID memberId, Authentication authentication) {
+        UUID userId = currentUserProvider.get(authentication).getId();
+        householdService.changeAdmin(householdId, memberId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{householdId}/leave")
+    public ResponseEntity<Void> leaveHousehold(@PathVariable UUID householdId, Authentication authentication) {
+        UUID userId = currentUserProvider.get(authentication).getId();
+        householdService.leaveHousehold(householdId, userId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/invitations/{invitationId}")
     public ResponseEntity<HouseholdPreviewResponse> previewHousehold(@PathVariable UUID invitationId, Authentication authentication) {
         UUID userId = currentUserProvider.get(authentication).getId();

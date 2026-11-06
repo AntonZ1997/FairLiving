@@ -47,4 +47,14 @@ export class HouseholdService {
   async removeMember(householdId: string, memberId: string): Promise<void> {
     await firstValueFrom(this.http.delete<void>(`${BASE_URL}/${householdId}/members/${memberId}`));
   }
+
+  async transferAdminRole(householdId: string, memberId: string): Promise<void> {
+    await firstValueFrom(
+      this.http.post<void>(`${BASE_URL}/${householdId}/members/${memberId}/admin`, null),
+    );
+  }
+
+  async leave(householdId: string): Promise<void> {
+    await firstValueFrom(this.http.post<void>(`${BASE_URL}/${householdId}/leave`, null));
+  }
 }

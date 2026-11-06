@@ -1,5 +1,8 @@
 package com.fairliving.backend.notification;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum NotificationType {
 
     INFO("info"),
@@ -12,10 +15,12 @@ public enum NotificationType {
         this.type = type;
     }
 
+    @JsonValue
     public String getType() {
         return type;
     }
 
+    @JsonCreator
     public static NotificationType fromString(String type) {
         for (NotificationType notificationType : NotificationType.values()) {
             if (notificationType.type.equals(type)) {

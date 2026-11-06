@@ -87,4 +87,11 @@ public class HouseholdRepository {
                         r.get(HOUSEHOLD_MEMBER.JOINED)
                 ));
     }
+
+    public void delete(UUID householdId) {
+        dslContext
+                .deleteFrom(HOUSEHOLD)
+                .where(HOUSEHOLD.ID.eq(householdId))
+                .execute();
+    }
 }

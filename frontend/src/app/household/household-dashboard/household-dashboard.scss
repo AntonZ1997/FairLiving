@@ -189,5 +189,26 @@
   text-decoration: none;
 }
 
+.notifications {
+  position: fixed;
+  right: 2rem;
+  bottom: 2rem;
+  z-index: 10;
+  --mat-fab-container-color: #ffffff;
+  --mat-fab-foreground-color: #000000;
+  --mat-badge-background-color: #ffd600;
+  --mat-badge-text-color: #000000;
+  --mat-badge-text-size: 14px;
+  --mat-badge-text-weight: 700;
+  --mat-badge-container-size: 24px;
+  --mat-badge-line-height: 24px;
+  --mat-badge-container-offset: -14px -2px;
+}
+
+.notifications .symbol {
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1;
+}
 
 
