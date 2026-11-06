@@ -1,0 +1,22 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>{{ title() }}</h2>
+
+  <button mat-icon-button type="button" aria-label="Schließen" (click)="close()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content>
+  @if (notifications.length === 0) {
+    <p class="empty">Du hast alle Benachrichtigungen gelesen.</p>
+  } @else {
+    <ul class="notifications">
+      @for (notification of notifications; track notification.notificationId) {
+        <li [class]="notification.type">
+          <span class="symbol">{{ symbol(notification.type) }}</span>
+          <p class="message">{{ notification.message }}</p>
+        </li>
+      }
+    </ul>
+  }
+</mat-dialog-content>
